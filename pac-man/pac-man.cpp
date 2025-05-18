@@ -1,5 +1,7 @@
 #include <raylib.h>
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 int Xres = 560, Yres = 440;
 Rectangle Blocks[316];
@@ -7,6 +9,22 @@ Rectangle Fruits[300];
 
 class PacMan {
 public:
+
+	void moveX(int pos)
+	{
+		position.x = pos;
+		if (framerec.width < 0)
+			framerec.width = -framerec.width;
+		isVertical = false;
+	}
+	void moveY(int pos)
+	{
+		position.y = pos;
+		if (framerec.width < 0)
+			framerec.width = -framerec.width;
+		isVertical = true;
+	}
+
 
 	void moveRight() {
 			position.x += 2.5;
@@ -103,31 +121,12 @@ public:
 					position.x = j * 20;
 					position.y = i * 20;
 
-
-
 				}
 			}
 		}
 	}
 
-	void pacGridUpdate(int array[][28], int length, int width)
-	{
-		for (int i = 0; i < length; ++i)
-		{
-			for (int j = 0; j < width; ++j)
-			{
-				if (array[i][j] == 2)
-				{
-					
-					if (IsKeyDown(KEY_RIGHT))
-					{
-						
-					}
 
-				}
-			}
-		}
-	}
 
 	void checkCollisions(Rectangle rec[])
 	{
@@ -203,12 +202,62 @@ public:
 		}
 	}
 
+	void pacGridUpdate(int array[][28], int length, int width)
+	{
+		for (int i = 0; i < length; ++i)
+		{
+			for (int j = 0; j < width; ++j)
+			{
+				if (array[i][j] == 2)
+				{
+
+					if (IsKeyDown(KEY_RIGHT) && array[i][j + 1] != 1)
+					{
+						array[i][j] = 0;
+						array[i][j + 1] = 2;
+					}
+					else if (IsKeyDown(KEY_LEFT) && array[i][j - 1] != 1)
+					{
+						array[i][j] = 0;
+						array[i][j - 1] = 2;
+					}
+					else if (IsKeyDown(KEY_UP) && array[i - 1][j] != 1)
+					{
+						array[i][j] = 0;
+						array[i - 1][j] = 2;
+					}
+					else if (IsKeyDown(KEY_DOWN) && array[i + 1][j] != 1)
+					{
+						array[i][j] = 0;
+						array[i + 1][j] = 2;
+					}
+
+
+				}
+			}
+		}
+	}
+
+	void printMap(int array[][28], int length, int width)
+	{
+		//std::this_thread::sleep_for(std::chrono::seconds(0.5));
+		for (int i = 0; i < length; ++i)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				std::cout << array[i][j];
+			}
+			std::cout <<  "----------------------------------------------\n\n\n";
+		}
+	}
+
 
 private:
 	int blockCount = 0;
 	int blockSize = 20;
 	Color mapcolor = { 0,0,139,200 };
 	Rectangle pacMap = { 50, 50, 550, 650 };
+	
 
 };
 
@@ -281,7 +330,7 @@ int main()
 
 		pac.checkCollisions(Blocks);
 		pac.checkLogic();
-
+		pacMap.pacGridUpdate(Grid, 22, 28);
 		ClearBackground(BLACK);
 
 		pacMap.createGrid(Grid, 22, 28);
@@ -289,6 +338,7 @@ int main()
 
 		EndDrawing();
 	}
+	pacMap.printMap(Grid, 22, 28);
 
 	CloseWindow();
 	
