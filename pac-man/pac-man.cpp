@@ -1,55 +1,138 @@
 #include <raylib.h>
+#include <iostream>
 
 int Xres = 560, Yres = 440;
-Rectangle Blocks[650];
+Rectangle Blocks[316];
+Rectangle Fruits[300];
 
 class PacMan {
 public:
 
-	void checkLogic() {
-
-		pac_direction.x = (float)IsKeyDown(KEY_RIGHT) - (float)IsKeyDown(KEY_LEFT);
-		pac_direction.y = (float)IsKeyDown(KEY_DOWN) - (float)IsKeyDown(KEY_UP);
-
-		if (IsKeyDown(KEY_RIGHT))
-		{
+	void moveRight() {
 			position.x += 2.5;
 			if (framerec.width < 0)
 				framerec.width = -framerec.width;
 			isVertical = false;
-		}
-		else if (IsKeyDown(KEY_LEFT))
-		{
+			last = 1;
+	}
+
+	void moveLeft()
+	{
 			position.x -= 2.5;
 			if (framerec.width > 0)
 				framerec.width = -framerec.width;
 			isVertical = false;
-		}
-		else if (IsKeyDown(KEY_UP))
-		{
+			last = 2;
+	}
+
+	void moveUp()
+	{
+		
 			isVertical = true;
 			position.y -= 2.5;
 			if (framerec.height < 0)
 				framerec.height = -framerec.height;
+			last = 3;
+	}
 
-
-		}
-		else if (IsKeyDown(KEY_DOWN))
-		{
+	void moveDown()
+	{
 			isVertical = true;
 			position.y += 2.5;
 			if (framerec.height > 0)
 				framerec.height = -framerec.height;
+			last = 4;
+	}
+
+	void checkLogic() {
+
+		if (IsKeyDown(KEY_RIGHT) && IsKeyDown(KEY_LEFT))
+			return;
+
+		pac_direction.x = (float)IsKeyDown(KEY_RIGHT) - (float)IsKeyDown(KEY_LEFT);
+		pac_direction.y = (float)IsKeyDown(KEY_DOWN) - (float)IsKeyDown(KEY_UP);
+
+		
+		if (IsKeyDown(KEY_RIGHT))
+			moveRight();
+		else if (IsKeyDown(KEY_LEFT))
+			moveLeft();
+		else if (IsKeyDown(KEY_UP))
+			moveUp();
+		else if (IsKeyDown(KEY_DOWN))
+			moveDown();
+		else {
+			switch (last)
+			{
+			case 1 : 
+				moveRight();
+				pac_direction.x = 1;
+				break;
+			case 2 : 
+				moveLeft();
+				pac_direction.x = -1;
+				break;
+			case 3 : 
+				moveUp();
+				pac_direction.y = -1;
+				break;
+			case 4:
+				moveDown();
+				pac_direction.y = 1;
+			}
 		}
+
+		
+		
 
 		++frameIndex;
 		framerec.x = (float)frameWidth * frameIndex;
 	}
 
+	void pacGrid(int array[][28], int length, int width)
+
+	{
+		// updates pac-man on the 2d grid 
+
+		for (int i = 0; i < length; ++i)
+		{
+			for (int j = 0; j < width; ++j)
+			{
+				if (array[i][j] == 2)
+				{
+					position.x = j * 20;
+					position.y = i * 20;
+
+
+
+				}
+			}
+		}
+	}
+
+	void pacGridUpdate(int array[][28], int length, int width)
+	{
+		for (int i = 0; i < length; ++i)
+		{
+			for (int j = 0; j < width; ++j)
+			{
+				if (array[i][j] == 2)
+				{
+					
+					if (IsKeyDown(KEY_RIGHT))
+					{
+						
+					}
+
+				}
+			}
+		}
+	}
+
 	void checkCollisions(Rectangle rec[])
 	{
 		Rectangle hitbox = getHitbox();
-		for (int i = 0; i < 620; ++i)
+		for (int i = 0; i < 316; ++i)
 		{
 			if (CheckCollisionRecs(rec[i], hitbox))
 			{
@@ -89,7 +172,8 @@ private:
 	int frameIndex = 0;
 	Rectangle framerec = { 0.0f, 0.0f, (float)pac_right.width / 9 , (float)pac_right.height };
 	Vector2 position = { 20, 20 };
-	Vector2 pac_direction = {1, 1};
+	Vector2 pac_direction = {1, 1}; 
+	int last = 0;
 };
 
 
@@ -109,7 +193,7 @@ public:
 					int y_position = i * blockSize;
 
 					Rectangle block = { (float)x_position, (float)y_position, (float)blockSize, (float)blockSize };
-					if (blockCount < 620){
+					if (blockCount < 316){
 						Blocks[blockCount] = block;
 						blockCount++;
 					}
@@ -128,12 +212,34 @@ private:
 
 };
 
+class Fruits {
+public:
+
+	void createFruits(int Grid[][28], int length, int width)
+	{
+		for (int i = 0; i < length; ++i)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				if (Grid[i][j] == 0)
+				{
+
+				}
+			}
+		}
+	}
+
+
+private:
+	
+};
+
 int Grid[22][28] = {
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
 	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 	{1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1},
 	{1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1},
 	{1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
@@ -165,13 +271,13 @@ int main()
 	Map pacMap;
 	PacMan pac;
 
+	pac.pacGrid(Grid, 22, 28);
 
 	while (!WindowShouldClose())
 	{
 
 
 		BeginDrawing();
-
 
 		pac.checkCollisions(Blocks);
 		pac.checkLogic();
