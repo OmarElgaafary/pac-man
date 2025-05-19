@@ -4,10 +4,16 @@
 
 int Xres = 560, Yres = 500;
 Rectangle Blocks[316];
-Rectangle Fruit_Blocks[300];
 Vector2 scorePositionText = { 50, 450 };
 Vector2 scorePositonNum = { 150 ,450 };
 int game_score = 0;
+
+struct Fruit_Item {
+	Rectangle fruit;
+	bool eaten = false;
+};
+Fruit_Item Fruit_Blocks[300];
+
 
 class Fruits {
 public:
@@ -17,22 +23,22 @@ public:
 		int fruitCounter = 0;
 		for (int i = 0; i < length; ++i)
 		{
-			for (int j = 0; j < width; j++)
+			for (int j = 0; j < width; ++j)
 			{
 				if (Grid[i][j] == 0)
 				{
 					int x_postion = j * 20;
 					int y_position = i * 20;
 
-					if (Fruit_Blocks[fruitCounter].x == 900)
+					if (Fruit_Blocks[fruitCounter].eaten)
 					{
 						fruitCounter++;
 						continue;
 
 					}
 
-					Rectangle Fruit = { (float)x_postion, (float)y_position, 2.5, 2.5 };
-					DrawRectangle(x_postion + 10, y_position + 10, Fruit.width, Fruit.height, WHITE);
+					Fruit_Item Fruit = { (float)x_postion, (float)y_position, 2.5, 2.5 };
+					DrawRectangle(x_postion + 10, y_position + 10, Fruit.fruit.width, Fruit.fruit.height, WHITE);
 					Fruit_Blocks[fruitCounter] = Fruit;
 					fruitCounter++;
 
@@ -47,7 +53,7 @@ private:
 
 class PacMan {
 public:
-	
+
 
 	void moveX(int pos)
 	{
@@ -66,39 +72,39 @@ public:
 
 
 	void moveRight() {
-			position.x += 2.5;
-			if (framerec.width < 0)
-				framerec.width = -framerec.width;
-			isVertical = false;
-			last = 1;
+		position.x += 2.5;
+		if (framerec.width < 0)
+			framerec.width = -framerec.width;
+		isVertical = false;
+		last = 1;
 	}
 
 	void moveLeft()
 	{
-			position.x -= 2.5;
-			if (framerec.width > 0)
-				framerec.width = -framerec.width;
-			isVertical = false;
-			last = 2;
+		position.x -= 2.5;
+		if (framerec.width > 0)
+			framerec.width = -framerec.width;
+		isVertical = false;
+		last = 2;
 	}
 
 	void moveUp()
 	{
-		
-			isVertical = true;
-			position.y -= 2.5;
-			if (framerec.height < 0)
-				framerec.height = -framerec.height;
-			last = 3;
+
+		isVertical = true;
+		position.y -= 2.5;
+		if (framerec.height < 0)
+			framerec.height = -framerec.height;
+		last = 3;
 	}
 
 	void moveDown()
 	{
-			isVertical = true;
-			position.y += 2.5;
-			if (framerec.height > 0)
-				framerec.height = -framerec.height;
-			last = 4;
+		isVertical = true;
+		position.y += 2.5;
+		if (framerec.height > 0)
+			framerec.height = -framerec.height;
+		last = 4;
 	}
 
 	void checkLogic() {
@@ -109,7 +115,7 @@ public:
 		pac_direction.x = (float)IsKeyDown(KEY_RIGHT) - (float)IsKeyDown(KEY_LEFT);
 		pac_direction.y = (float)IsKeyDown(KEY_DOWN) - (float)IsKeyDown(KEY_UP);
 
-		
+
 		if (IsKeyDown(KEY_RIGHT))
 			moveRight();
 		else if (IsKeyDown(KEY_LEFT))
@@ -121,15 +127,15 @@ public:
 		else {
 			switch (last)
 			{
-			case 1 : 
+			case 1:
 				moveRight();
 				pac_direction.x = 1;
 				break;
-			case 2 : 
+			case 2:
 				moveLeft();
 				pac_direction.x = -1;
 				break;
-			case 3 : 
+			case 3:
 				moveUp();
 				pac_direction.y = -1;
 				break;
@@ -139,8 +145,8 @@ public:
 			}
 		}
 
-		
-		
+
+
 
 		++frameIndex;
 		framerec.x = (float)frameWidth * frameIndex;
@@ -198,7 +204,7 @@ public:
 	Rectangle getHitbox()
 	{
 		Rectangle hitbox = { position.x, position.y, (float)frameWidth, (float)pac_right.height };
-		
+
 		return hitbox;
 	}
 
@@ -206,10 +212,26 @@ public:
 	{
 		for (int i = 0; i < 300; ++i)
 		{
-			if (CheckCollisionRecs(getHitbox(), Fruit_Blocks[i]))
+			if (CheckCollisionRecs(getHitbox(), Fruit_Blocks[i].fruit) && !Fruit_Blocks[i].eaten)
 			{
-				Fruit_Blocks[i].x = 900;
+				Fruit_Blocks[i].eaten = true;
 				game_score += 10;
+				std::cout << "sound\n";
+			}
+		}
+	}
+
+	void trackPosition(int array[][28], int length, int width)
+	{
+		for (int i = 0; i < length; ++i)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				if (pac_direction.x == 1 && array[i][j + 1] == 0)
+				{
+					array[i][j + 1] = 2;
+					array[i][j];
+				}
 			}
 		}
 	}
@@ -223,9 +245,9 @@ private:
 	int frameIndex = 0;
 	Rectangle framerec = { 0.0f, 0.0f, (float)pac_right.width / 9 , (float)pac_right.height };
 	Vector2 position = { 20, 20 };
-	Vector2 pac_direction = {1, 1}; 
+	Vector2 pac_direction = { 1, 1 };
 	int last = 0;
-	
+
 };
 
 
@@ -249,10 +271,10 @@ public:
 					int x_position = j * blockSize;
 					int y_position = i * blockSize;
 
-					
+
 
 					Rectangle block = { (float)x_position, (float)y_position, (float)blockSize, (float)blockSize };
-					if (blockCount < 316){
+					if (blockCount < 316) {
 						Blocks[blockCount] = block;
 						blockCount++;
 					}
@@ -262,7 +284,7 @@ public:
 		}
 	}
 
-	
+
 
 	void printMap(int array[][28], int length, int width)
 	{
@@ -272,13 +294,8 @@ public:
 			{
 				std::cout << array[i][j];
 			}
-			std::cout <<  "----------------------------------------------\n\n\n";
+			std::cout << "----------------------------------------------\n\n\n";
 		}
-	}
-
-	void displayScore()
-	{
-		
 	}
 
 
@@ -287,8 +304,8 @@ private:
 	int blockSize = 20;
 	Color mapcolor = { 0,0,139,200 };
 	Rectangle pacMap = { 50, 50, 550, 650 };
-	
-	
+
+
 
 };
 
@@ -296,10 +313,10 @@ private:
 
 int Grid[22][28] = {
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
 	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 	{1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1},
 	{1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1},
 	{1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
@@ -348,7 +365,8 @@ int main()
 		ClearBackground(BLACK);
 
 		pacMap.createGrid(Grid, 22, 28);
-		pacMap.displayScore();
+		//pac.trackPosition(Grid, 22, 28);
+		//pacMap.displayScore();
 		pac.Draw();
 
 		std::string score = std::to_string(game_score);
@@ -356,8 +374,7 @@ int main()
 
 		EndDrawing();
 	}
-
 	CloseWindow();
-	
+
 	return 0;
 }
