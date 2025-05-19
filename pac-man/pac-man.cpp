@@ -1,14 +1,53 @@
 #include <raylib.h>
 #include <iostream>
-#include <thread>
-#include <chrono>
+#include <string>
 
-int Xres = 560, Yres = 440;
+int Xres = 560, Yres = 500;
 Rectangle Blocks[316];
-Rectangle Fruits[300];
+Rectangle Fruit_Blocks[300];
+Vector2 scorePositionText = { 50, 450 };
+Vector2 scorePositonNum = { 150 ,450 };
+int game_score = 0;
+
+class Fruits {
+public:
+
+	void createFruits(int Grid[][28], int length, int width)
+	{
+		int fruitCounter = 0;
+		for (int i = 0; i < length; ++i)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				if (Grid[i][j] == 0)
+				{
+					int x_postion = j * 20;
+					int y_position = i * 20;
+
+					if (Fruit_Blocks[fruitCounter].x == 900)
+					{
+						fruitCounter++;
+						continue;
+
+					}
+
+					Rectangle Fruit = { (float)x_postion, (float)y_position, 2.5, 2.5 };
+					DrawRectangle(x_postion + 10, y_position + 10, Fruit.width, Fruit.height, WHITE);
+					Fruit_Blocks[fruitCounter] = Fruit;
+					fruitCounter++;
+
+				}
+			}
+		}
+	}
+
+
+private:
+};
 
 class PacMan {
 public:
+	
 
 	void moveX(int pos)
 	{
@@ -159,7 +198,20 @@ public:
 	Rectangle getHitbox()
 	{
 		Rectangle hitbox = { position.x, position.y, (float)frameWidth, (float)pac_right.height };
+		
 		return hitbox;
+	}
+
+	void eatFruit()
+	{
+		for (int i = 0; i < 300; ++i)
+		{
+			if (CheckCollisionRecs(getHitbox(), Fruit_Blocks[i]))
+			{
+				Fruit_Blocks[i].x = 900;
+				game_score += 10;
+			}
+		}
 	}
 
 
@@ -173,12 +225,18 @@ private:
 	Vector2 position = { 20, 20 };
 	Vector2 pac_direction = {1, 1}; 
 	int last = 0;
+	
 };
 
 
 
 class Map {
 public:
+
+	Vector2 getScorePosition()
+	{
+		return scorePositionText;
+	}
 
 	void createGrid(int array[][28], int length, int width)
 	{
@@ -191,6 +249,8 @@ public:
 					int x_position = j * blockSize;
 					int y_position = i * blockSize;
 
+					
+
 					Rectangle block = { (float)x_position, (float)y_position, (float)blockSize, (float)blockSize };
 					if (blockCount < 316){
 						Blocks[blockCount] = block;
@@ -202,45 +262,10 @@ public:
 		}
 	}
 
-	void pacGridUpdate(int array[][28], int length, int width)
-	{
-		for (int i = 0; i < length; ++i)
-		{
-			for (int j = 0; j < width; ++j)
-			{
-				if (array[i][j] == 2)
-				{
-
-					if (IsKeyDown(KEY_RIGHT) && array[i][j + 1] != 1)
-					{
-						array[i][j] = 0;
-						array[i][j + 1] = 2;
-					}
-					else if (IsKeyDown(KEY_LEFT) && array[i][j - 1] != 1)
-					{
-						array[i][j] = 0;
-						array[i][j - 1] = 2;
-					}
-					else if (IsKeyDown(KEY_UP) && array[i - 1][j] != 1)
-					{
-						array[i][j] = 0;
-						array[i - 1][j] = 2;
-					}
-					else if (IsKeyDown(KEY_DOWN) && array[i + 1][j] != 1)
-					{
-						array[i][j] = 0;
-						array[i + 1][j] = 2;
-					}
-
-
-				}
-			}
-		}
-	}
+	
 
 	void printMap(int array[][28], int length, int width)
 	{
-		//std::this_thread::sleep_for(std::chrono::seconds(0.5));
 		for (int i = 0; i < length; ++i)
 		{
 			for (int j = 0; j < width; j++)
@@ -251,6 +276,11 @@ public:
 		}
 	}
 
+	void displayScore()
+	{
+		
+	}
+
 
 private:
 	int blockCount = 0;
@@ -258,30 +288,11 @@ private:
 	Color mapcolor = { 0,0,139,200 };
 	Rectangle pacMap = { 50, 50, 550, 650 };
 	
-
-};
-
-class Fruits {
-public:
-
-	void createFruits(int Grid[][28], int length, int width)
-	{
-		for (int i = 0; i < length; ++i)
-		{
-			for (int j = 0; j < width; j++)
-			{
-				if (Grid[i][j] == 0)
-				{
-
-				}
-			}
-		}
-	}
-
-
-private:
 	
+
 };
+
+
 
 int Grid[22][28] = {
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -308,6 +319,7 @@ int Grid[22][28] = {
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 };
 
+Font font = LoadFontEx("C:/Users/Omar/Desktop/Pac/pac-man/emulogic-font/font.ttf", 32, 0, 0);
 
 int main()
 
@@ -319,26 +331,31 @@ int main()
 
 	Map pacMap;
 	PacMan pac;
+	Fruits pacFruit;
 
 	pac.pacGrid(Grid, 22, 28);
-
 	while (!WindowShouldClose())
 	{
-
+		DrawTextEx(font, "Score:", scorePositionText, 25, 2, WHITE);
 
 		BeginDrawing();
 
 		pac.checkCollisions(Blocks);
 		pac.checkLogic();
-		pacMap.pacGridUpdate(Grid, 22, 28);
+		pacFruit.createFruits(Grid, 22, 28);
+		pac.eatFruit();
+
 		ClearBackground(BLACK);
 
 		pacMap.createGrid(Grid, 22, 28);
+		pacMap.displayScore();
 		pac.Draw();
+
+		std::string score = std::to_string(game_score);
+		DrawTextEx(font, score.c_str(), scorePositonNum, 25, 2, WHITE);
 
 		EndDrawing();
 	}
-	pacMap.printMap(Grid, 22, 28);
 
 	CloseWindow();
 	
