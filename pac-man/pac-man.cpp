@@ -3,7 +3,7 @@
 #include <string>
 
 int Xres = 560, Yres = 500;
-Rectangle Blocks[316];
+Rectangle Blocks[366];
 Vector2 scorePositionText = { 50, 450 };
 Vector2 scorePositonNum = { 150 ,450 };
 int game_score = 0;
@@ -21,7 +21,7 @@ public:
 	void createFruits(int Grid[][28], int length, int width)
 	{
 		int fruitCounter = 0;
-		for (int i = 0; i < length; ++i)
+		for (int i = 0; i < length + 1; ++i)
 		{
 			for (int j = 0; j < width; ++j)
 			{
@@ -112,6 +112,9 @@ public:
 		if (IsKeyDown(KEY_RIGHT) && IsKeyDown(KEY_LEFT))
 			return;
 
+		if (IsKeyDown(KEY_UP) && IsKeyDown(KEY_DOWN))
+			return;
+
 		pac_direction.x = (float)IsKeyDown(KEY_RIGHT) - (float)IsKeyDown(KEY_LEFT);
 		pac_direction.y = (float)IsKeyDown(KEY_DOWN) - (float)IsKeyDown(KEY_UP);
 
@@ -176,7 +179,7 @@ public:
 	void checkCollisions(Rectangle rec[])
 	{
 		Rectangle hitbox = getHitbox();
-		for (int i = 0; i < 316; ++i)
+		for (int i = 0; i < 366; ++i)
 		{
 			if (CheckCollisionRecs(rec[i], hitbox))
 			{
@@ -274,7 +277,7 @@ public:
 
 
 					Rectangle block = { (float)x_position, (float)y_position, (float)blockSize, (float)blockSize };
-					if (blockCount < 316) {
+					if (blockCount < 366) {
 						Blocks[blockCount] = block;
 						blockCount++;
 					}
@@ -359,7 +362,7 @@ int main()
 
 		pac.checkCollisions(Blocks);
 		pac.checkLogic();
-		pacFruit.createFruits(Grid, 22, 28);
+		pacFruit.createFruits(Grid, 21, 28);
 		pac.eatFruit();
 
 		ClearBackground(BLACK);
