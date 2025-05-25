@@ -107,7 +107,7 @@ public:
 		last = 4;
 	}
 
-	void checkLogic() {
+	void checkLogic() {	
 
 		if (IsKeyDown(KEY_RIGHT) && IsKeyDown(KEY_LEFT))
 			return;
@@ -131,18 +131,27 @@ public:
 			switch (last)
 			{
 			case 1:
+				if (collided) {
+					std::cout << "sound\n";
+				}
 				moveRight();
 				pac_direction.x = 1;
 				break;
 			case 2:
+				if (collided)
+					return;
 				moveLeft();
 				pac_direction.x = -1;
 				break;
 			case 3:
+				if (collided)
+					return;
 				moveUp();
 				pac_direction.y = -1;
 				break;
 			case 4:
+				if (collided)
+					return;
 				moveDown();
 				pac_direction.y = 1;
 			}
@@ -191,6 +200,11 @@ public:
 					position.y = rec[i].y - hitbox.height;
 				else if (pac_direction.y < 0)
 					position.y = rec[i].y + hitbox.height;
+
+				collided = true;
+			}
+			else {
+				collided = false;
 			}
 		}
 	}
@@ -219,7 +233,6 @@ public:
 			{
 				Fruit_Blocks[i].eaten = true;
 				game_score += 10;
-				std::cout << "sound\n";
 			}
 		}
 	}
@@ -239,6 +252,12 @@ public:
 		}
 	}
 
+	void pos()
+	{
+		std::cout << "PAC (X): " << position.x << "\n";
+		std::cout << "PAC (Y): " << position.y << "\n";
+	}
+
 
 private:
 	bool isVertical = false;
@@ -250,6 +269,7 @@ private:
 	Vector2 position = { 20, 20 };
 	Vector2 pac_direction = { 1, 1 };
 	int last = 0;
+	bool collided = false;
 
 };
 
@@ -359,9 +379,9 @@ int main()
 		DrawTextEx(font, "Score:", scorePositionText, 25, 2, WHITE);
 
 		BeginDrawing();
+		pac.checkLogic();
 
 		pac.checkCollisions(Blocks);
-		pac.checkLogic();
 		pacFruit.createFruits(Grid, 21, 28);
 		pac.eatFruit();
 
@@ -374,6 +394,7 @@ int main()
 
 		std::string score = std::to_string(game_score);
 		DrawTextEx(font, score.c_str(), scorePositonNum, 25, 2, WHITE);
+		pac.pos();
 
 		EndDrawing();
 	}
