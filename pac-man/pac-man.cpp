@@ -8,6 +8,31 @@ Vector2 scorePositionText = { 50, 450 };
 Vector2 scorePositonNum = { 150 ,450 };
 int game_score = 0;
 
+int Grid[22][28] = {
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
+	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1},
+	{1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
+	{0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0},
+	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
+	{0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0},
+	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
+	{1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1},
+	{1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1},
+	{1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+};
+
 struct Fruit_Item {
 	Rectangle fruit;
 	bool eaten = false;
@@ -77,6 +102,7 @@ public:
 			framerec.width = -framerec.width;
 		isVertical = false;
 		last = 1;
+		update(Grid, 22, 28, last);
 	}
 
 	void moveLeft()
@@ -86,6 +112,8 @@ public:
 			framerec.width = -framerec.width;
 		isVertical = false;
 		last = 2;
+		update(Grid, 22, 28, last);
+
 	}
 
 	void moveUp()
@@ -96,6 +124,8 @@ public:
 		if (framerec.height < 0)
 			framerec.height = -framerec.height;
 		last = 3;
+		update(Grid, 22, 28, last);
+
 	}
 
 	void moveDown()
@@ -105,9 +135,11 @@ public:
 		if (framerec.height > 0)
 			framerec.height = -framerec.height;
 		last = 4;
+		update(Grid, 22, 28, last);
+
 	}
 
-	void checkLogic() {	
+	void checkLogic() {
 
 		if (IsKeyDown(KEY_RIGHT) && IsKeyDown(KEY_LEFT))
 			return;
@@ -128,33 +160,26 @@ public:
 		else if (IsKeyDown(KEY_DOWN))
 			moveDown();
 		else {
+
 			switch (last)
 			{
 			case 1:
-				if (collided) {
-					std::cout << "sound\n";
-				}
 				moveRight();
 				pac_direction.x = 1;
 				break;
 			case 2:
-				if (collided)
-					return;
 				moveLeft();
 				pac_direction.x = -1;
 				break;
 			case 3:
-				if (collided)
-					return;
 				moveUp();
 				pac_direction.y = -1;
 				break;
 			case 4:
-				if (collided)
-					return;
 				moveDown();
 				pac_direction.y = 1;
 			}
+
 		}
 
 
@@ -183,8 +208,78 @@ public:
 		}
 	}
 
+	void update(int array[][28], int length, int width, int input)
+	{
+		int blockCount = 0;
+		for (int i = 1; i < length; ++i)
+		{
+			for (int j = 1; j < width; ++j)
+			{
+				//moving right
+
+				if (collision)
+				{
+					continue;
+				}
+				
 
 
+				if (input == 1 && position.x >= j * 20 && position.x < ((j+1) * 20) && position.y >= i * 20 && position.y < ((i+1) * 20))
+				{
+					if (array[i][j + 1] == 0)
+					{
+						array[i][j + 1] = 2;
+						array[i][j] = 0;
+					} 
+
+				}
+
+				//moving left
+
+				if (input == 2 && position.x > ((j - 1) * 20) && position.x <= j * 20 && position.y >= i * 20 && position.y < ((i + 1) * 20))
+				{
+					if (array[i][j - 1] == 0)
+					{
+						array[i][j - 1] = 2;
+						array[i][j] = 0;
+					}
+				}
+
+				// moving up
+
+				if (input == 3 && position.y >= ((i - 1) * 20) && position.y < i * 20 && position.x >= j * 20 && position.x < ((j + 1) * 20))
+				{
+					if (array[i - 1][j] == 0)
+					{
+						array[i - 1][j] = 2;
+						array[i][j] = 0;
+
+					}
+				}
+
+				// moving down
+
+				if (input == 4 && position.y >= i * 20 && position.y < ((i + 1) * 20) && position.x >= j * 20 && position.x < ((j + 1) * 20))
+				{
+					if (array[i+1][j] == 0)
+					{
+						array[i + 1][j] = 2;
+						array[i][j] = 0;
+					}
+				}
+
+
+
+
+
+
+
+			}
+		}
+	}
+
+
+	bool collision = false;
 	void checkCollisions(Rectangle rec[])
 	{
 		Rectangle hitbox = getHitbox();
@@ -200,13 +295,35 @@ public:
 					position.y = rec[i].y - hitbox.height;
 				else if (pac_direction.y < 0)
 					position.y = rec[i].y + hitbox.height;
-
-				collided = true;
+				collision = true;
+				return;
 			}
-			else {
-				collided = false;
+
+			collision = false;
+		}
+	}
+
+	bool returnCheckCollisions(Rectangle rec[])
+	{
+		Rectangle hitbox = getHitbox();
+		for (int i = 0; i < 366; ++i)
+		{
+			if (CheckCollisionRecs(rec[i], hitbox))
+			{
+				if (pac_direction.x > 0)
+					position.x = rec[i].x - hitbox.width;
+				else if (pac_direction.x < 0)
+					position.x = rec[i].x + hitbox.width;
+				else if (pac_direction.y > 0)
+					position.y = rec[i].y - hitbox.height;
+				else if (pac_direction.y < 0)
+					position.y = rec[i].y + hitbox.height;
+
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	void Draw()
@@ -258,6 +375,12 @@ public:
 		std::cout << "PAC (Y): " << position.y << "\n";
 	}
 
+	void direction()
+	{
+		std::cout << "PAC DIRECTION (X): " << pac_direction.x << "\n";
+		std::cout << "PAC DIRECTION (Y): " << pac_direction.y << "\n";
+	}
+
 
 private:
 	bool isVertical = false;
@@ -269,7 +392,7 @@ private:
 	Vector2 position = { 20, 20 };
 	Vector2 pac_direction = { 1, 1 };
 	int last = 0;
-	bool collided = false;
+	bool col = false;
 
 };
 
@@ -317,7 +440,7 @@ public:
 			{
 				std::cout << array[i][j];
 			}
-			std::cout << "----------------------------------------------\n\n\n";
+			std::cout << "\n";
 		}
 	}
 
@@ -334,30 +457,7 @@ private:
 
 
 
-int Grid[22][28] = {
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1},
-	{1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-	{0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0},
-	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-	{0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0},
-	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1},
-	{1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1},
-	{1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-};
+
 
 Font font = LoadFontEx("C:/Users/Omar/Desktop/Pac/pac-man/emulogic-font/font.ttf", 32, 0, 0);
 
@@ -388,17 +488,17 @@ int main()
 		ClearBackground(BLACK);
 
 		pacMap.createGrid(Grid, 22, 28);
-		//pac.trackPosition(Grid, 22, 28);
-		//pacMap.displayScore();
 		pac.Draw();
 
 		std::string score = std::to_string(game_score);
 		DrawTextEx(font, score.c_str(), scorePositonNum, 25, 2, WHITE);
 		pac.pos();
-
+		//pac.direction();
 		EndDrawing();
 	}
+	pacMap.printMap(Grid, 22, 28);
+
 	CloseWindow();
 
 	return 0;
-}
+}	
