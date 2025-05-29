@@ -2,11 +2,15 @@
 #include <iostream>
 #include <string>
 
+//Globals
 int Xres = 560, Yres = 500;
 Rectangle Blocks[366];
 Vector2 scorePositionText = { 50, 450 };
 Vector2 scorePositonNum = { 150 ,450 };
+bool moving = false;
 int game_score = 0;
+
+Font font = LoadFontEx("C:/Users/Omar/Desktop/Pac/pac-man/emulogic-font/font.ttf", 32, 0, 0);
 
 int Grid[22][28] = {
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -17,11 +21,11 @@ int Grid[22][28] = {
 	{1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1},
 	{1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1},
 	{1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-	{0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0},
+	{3, 3, 3, 3, 3, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 3, 3, 3, 3, 3},
 	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-	{0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0},
+	{3, 3, 3, 3, 3, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 3, 3, 3, 3, 3},
 	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
 	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
@@ -68,6 +72,11 @@ public:
 					fruitCounter++;
 
 				}
+
+				if (Grid[i][j] == 3)
+				{
+					continue;
+				}
 			}
 		}
 	}
@@ -96,13 +105,13 @@ public:
 	}
 
 
-	void moveRight() {
+	void moveRight() 
+	{
 		position.x += 2.5;
 		if (framerec.width < 0)
 			framerec.width = -framerec.width;
 		isVertical = false;
 		last = 1;
-		update(Grid, 22, 28, last);
 	}
 
 	void moveLeft()
@@ -112,19 +121,16 @@ public:
 			framerec.width = -framerec.width;
 		isVertical = false;
 		last = 2;
-		update(Grid, 22, 28, last);
 
 	}
 
 	void moveUp()
 	{
-
 		isVertical = true;
 		position.y -= 2.5;
 		if (framerec.height < 0)
 			framerec.height = -framerec.height;
 		last = 3;
-		update(Grid, 22, 28, last);
 
 	}
 
@@ -135,8 +141,30 @@ public:
 		if (framerec.height > 0)
 			framerec.height = -framerec.height;
 		last = 4;
-		update(Grid, 22, 28, last);
+	}
 
+	void startMoving()
+	{
+		if (IsKeyDown(KEY_RIGHT))
+		{
+			last = 1;
+			moving = true;
+		}
+		else if (IsKeyDown(KEY_LEFT))
+		{
+			last = 2;
+			moving = true;
+		}
+		else if (IsKeyDown(KEY_UP))
+		{
+			last = 3;
+			moving = true;
+		}
+		else if (IsKeyDown(KEY_DOWN))
+		{
+			last = 4;
+			moving = true;
+		}
 	}
 
 	void checkLogic() {
@@ -152,13 +180,57 @@ public:
 
 
 		if (IsKeyDown(KEY_RIGHT))
-			moveRight();
+		{
+			if (last == 2)
+				moveRight();
+			else if (last == 3 || last == 4)
+			{
+				if (!checkNextCollisionRight())
+					moveRight();
+				else 
+					queueRight = true;
+			}
+		}
 		else if (IsKeyDown(KEY_LEFT))
-			moveLeft();
+		{
+			if (last == 1)
+				moveLeft();
+			else if (last == 3 || last == 4)
+			{
+				if (!checkNextCollisionLeft())
+					moveLeft();
+				else
+				{
+					queueLeft = true;
+				}
+			}
+			
+		}
 		else if (IsKeyDown(KEY_UP))
-			moveUp();
+
+		{
+			if (last == 4)
+				moveUp();
+			else if (last == 1 || last == 2)
+			{
+				if (!checkNextCollisionUp())
+					moveUp();
+				else
+					queueUp = true;
+			}
+		}
 		else if (IsKeyDown(KEY_DOWN))
-			moveDown();
+		{
+			if (last == 3)
+				moveDown();
+			else if (last == 1 || last == 2)
+			{
+				if (!checkNextCollisionDown())
+					moveDown();
+				else
+					queueDown = true;
+			}
+		} 
 		else {
 
 			switch (last)
@@ -166,18 +238,104 @@ public:
 			case 1:
 				moveRight();
 				pac_direction.x = 1;
+
+				if (queueDown)
+				{
+					std::cout << "Im called\n";
+					if (!checkNextCollisionDown())
+					{
+						last = 4;
+						queueDown = false;
+						return;
+					}
+				}
+
+				if (queueUp)
+				{
+					if (!checkNextCollisionUp())
+					{
+						last = 3;
+						queueUp = false;
+						return;
+					}
+				}
+
+				
 				break;
 			case 2:
+
 				moveLeft();
 				pac_direction.x = -1;
+				if (queueDown)
+				{
+					std::cout << "Im called\n";
+					if (!checkNextCollisionDown())
+					{
+						last = 4;
+						queueDown = false;
+						return;
+					}
+				}
+
+				if (queueUp)
+				{
+					if (!checkNextCollisionUp())
+					{
+						last = 3;
+						queueUp = false;
+						return;
+					}
+				}
+			
 				break;
 			case 3:
 				moveUp();
 				pac_direction.y = -1;
+				if (queueRight)
+				{
+					if (!checkNextCollisionRight())
+					{
+						last = 1;
+						queueRight = false;
+						return;
+					}
+				}
+
+				if (queueLeft)
+				{
+					if (!checkNextCollisionLeft())
+					{
+						last = 2;
+						queueLeft = false;
+						return;
+					}
+				}
+
+				
 				break;
 			case 4:
 				moveDown();
 				pac_direction.y = 1;
+				if (queueRight)
+				{
+					if (!checkNextCollisionRight())
+					{
+						last = 1;
+						queueRight = false;
+						return;
+					}
+				}
+
+				if (queueLeft)
+				{
+					if (!checkNextCollisionLeft())
+					{
+						last = 2;
+						queueLeft = false;
+						return;
+					}
+				}
+				
 			}
 
 		}
@@ -185,9 +343,73 @@ public:
 
 
 
+
+
 		++frameIndex;
 		framerec.x = (float)frameWidth * frameIndex;
 	}
+
+
+
+	bool checkNextCollisionDown()
+	{
+
+		Rectangle Hitbox = getHitbox();
+		Hitbox.y += 10;
+		for (int i = 0; i < 366; i++)
+		{
+			if (CheckCollisionRecs(Hitbox, Blocks[i]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	bool checkNextCollisionUp()
+	{
+
+		Rectangle Hitbox = getHitbox();
+		Hitbox.y -= 10;
+		for (int i = 0; i < 366; i++)
+		{
+			if (CheckCollisionRecs(Hitbox, Blocks[i]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool checkNextCollisionRight()
+	{
+
+		Rectangle Hitbox = getHitbox();
+		Hitbox.x += 10;
+		for (int i = 0; i < 366; i++)
+		{
+			if (CheckCollisionRecs(Hitbox, Blocks[i]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool checkNextCollisionLeft()
+	{
+
+		Rectangle Hitbox = getHitbox();
+		Hitbox.x -= 10;
+		for (int i = 0; i < 366; i++)
+		{
+			if (CheckCollisionRecs(Hitbox, Blocks[i]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	void pacGrid(int array[][28], int length, int width)
 
@@ -208,78 +430,7 @@ public:
 		}
 	}
 
-	void update(int array[][28], int length, int width, int input)
-	{
-		int blockCount = 0;
-		for (int i = 1; i < length; ++i)
-		{
-			for (int j = 1; j < width; ++j)
-			{
-				//moving right
 
-				if (collision)
-				{
-					continue;
-				}
-				
-
-
-				if (input == 1 && position.x >= j * 20 && position.x < ((j+1) * 20) && position.y >= i * 20 && position.y < ((i+1) * 20))
-				{
-					if (array[i][j + 1] == 0)
-					{
-						array[i][j + 1] = 2;
-						array[i][j] = 0;
-					} 
-
-				}
-
-				//moving left
-
-				if (input == 2 && position.x > ((j - 1) * 20) && position.x <= j * 20 && position.y >= i * 20 && position.y < ((i + 1) * 20))
-				{
-					if (array[i][j - 1] == 0)
-					{
-						array[i][j - 1] = 2;
-						array[i][j] = 0;
-					}
-				}
-
-				// moving up
-
-				if (input == 3 && position.y >= ((i - 1) * 20) && position.y < i * 20 && position.x >= j * 20 && position.x < ((j + 1) * 20))
-				{
-					if (array[i - 1][j] == 0)
-					{
-						array[i - 1][j] = 2;
-						array[i][j] = 0;
-
-					}
-				}
-
-				// moving down
-
-				if (input == 4 && position.y >= i * 20 && position.y < ((i + 1) * 20) && position.x >= j * 20 && position.x < ((j + 1) * 20))
-				{
-					if (array[i+1][j] == 0)
-					{
-						array[i + 1][j] = 2;
-						array[i][j] = 0;
-					}
-				}
-
-
-
-
-
-
-
-			}
-		}
-	}
-
-
-	bool collision = false;
 	void checkCollisions(Rectangle rec[])
 	{
 		Rectangle hitbox = getHitbox();
@@ -381,18 +532,32 @@ public:
 		std::cout << "PAC DIRECTION (Y): " << pac_direction.y << "\n";
 	}
 
+	void lastStatus()
+	{
+		std::cout << "Last: " << last << std::endl;
+	}
+
 
 private:
-	bool isVertical = false;
+
 	Texture2D pac_right = LoadTexture("C:/Users/Omar/Desktop/Pac/pac-man/pac-man-h.png");
 	Texture2D pac_up = LoadTexture("C:/Users/Omar/Desktop/Pac/pac-man/pac-man-v.png");
-	int frameWidth = pac_right.width / 9;
-	int frameIndex = 0;
+
 	Rectangle framerec = { 0.0f, 0.0f, (float)pac_right.width / 9 , (float)pac_right.height };
+
 	Vector2 position = { 20, 20 };
 	Vector2 pac_direction = { 1, 1 };
+
+	int frameWidth = pac_right.width / 9;
+	int frameIndex = 0;
 	int last = 0;
-	bool col = false;
+
+	bool isVertical = false;
+	bool collision = false;
+	bool queueUp = false;
+	bool queueDown = false;
+	bool queueRight = false;
+	bool queueLeft = false;
 
 };
 
@@ -446,20 +611,15 @@ public:
 
 
 private:
+
 	int blockCount = 0;
 	int blockSize = 20;
+
 	Color mapcolor = { 0,0,139,200 };
 	Rectangle pacMap = { 50, 50, 550, 650 };
 
-
-
 };
 
-
-
-
-
-Font font = LoadFontEx("C:/Users/Omar/Desktop/Pac/pac-man/emulogic-font/font.ttf", 32, 0, 0);
 
 int main()
 
@@ -479,26 +639,30 @@ int main()
 		DrawTextEx(font, "Score:", scorePositionText, 25, 2, WHITE);
 
 		BeginDrawing();
-		pac.checkLogic();
 
-		pac.checkCollisions(Blocks);
-		pacFruit.createFruits(Grid, 21, 28);
-		pac.eatFruit();
+		if (!moving)
+		{
+			pac.startMoving();
+		}
+		else
+		{
+			//pac.lastStatus();
+			pac.checkLogic();
+			pac.checkCollisions(Blocks);
+			pacFruit.createFruits(Grid, 21, 28);
+			pac.eatFruit();
+		}
 
 		ClearBackground(BLACK);
-
 		pacMap.createGrid(Grid, 22, 28);
 		pac.Draw();
 
 		std::string score = std::to_string(game_score);
 		DrawTextEx(font, score.c_str(), scorePositonNum, 25, 2, WHITE);
-		pac.pos();
-		//pac.direction();
 		EndDrawing();
 	}
-	pacMap.printMap(Grid, 22, 28);
 
 	CloseWindow();
 
 	return 0;
-}	
+}
