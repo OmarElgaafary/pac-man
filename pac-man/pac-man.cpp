@@ -3,8 +3,8 @@
 #include <string>
 
 //Globals
-int Xres = 560, Yres = 500;
-Rectangle Blocks[366];
+int Xres = 560, Yres = 1000;
+Rectangle Blocks[556];
 Vector2 scorePositionText = { 50, 450 };
 Vector2 scorePositonNum = { 150 ,450 };
 bool moving = false;
@@ -12,29 +12,38 @@ int game_score = 0;
 
 Font font = LoadFontEx("C:/Users/Omar/Desktop/Pac/pac-man/emulogic-font/font.ttf", 32, 0, 0);
 
-int Grid[22][28] = {
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1},
-	{1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-	{3, 3, 3, 3, 3, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 3, 3, 3, 3, 3},
-	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-	{3, 3, 3, 3, 3, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 3, 3, 3, 3, 3},
-	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1},
-	{1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1},
-	{1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+int Grid[31][28] = {
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, 
+	{1,2,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
+	{1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1}, 
+	{1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1}, 
+	{1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1}, 
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1}, 
+	{1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1}, 
+	{1,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,1}, 
+	{1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1}, 
+	{1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1}, 
+	{1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1},	
+	{1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1},	
+	{1,1,1,1,1,1,0,1,1,0,1,3,3,3,3,3,3,1,0,1,1,0,1,1,1,1,1,1}, 
+	{0,0,0,0,0,0,0,0,0,0,1,3,3,3,3,3,3,1,0,0,0,0,0,0,0,0,0,0}, 
+	{1,1,1,1,1,1,0,1,1,0,1,3,3,3,3,3,3,1,0,1,1,0,1,1,1,1,1,1}, 
+	{1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1},
+	{1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1},
+	{1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1},
+	{1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1},
+	{1,0,0,0,1,1,0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0,1,1,0,0,0,1}, 
+	{1,1,1,0,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,0,1,1,1}, 
+	{1,1,1,0,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,0,1,1,1},
+	{1,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,1},
+	{1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1},
+	{1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
 
 struct Fruit_Item {
@@ -169,17 +178,11 @@ public:
 
 	void checkLogic() {
 
-		if (IsKeyDown(KEY_RIGHT) && IsKeyDown(KEY_LEFT))
-			return;
-
-		if (IsKeyDown(KEY_UP) && IsKeyDown(KEY_DOWN))
-			return;
-
 		pac_direction.x = (float)IsKeyDown(KEY_RIGHT) - (float)IsKeyDown(KEY_LEFT);
 		pac_direction.y = (float)IsKeyDown(KEY_DOWN) - (float)IsKeyDown(KEY_UP);
 
 
-		if (IsKeyDown(KEY_RIGHT))
+		if (IsKeyPressed(KEY_RIGHT))
 		{
 			if (last == 2)
 				moveRight();
@@ -191,7 +194,7 @@ public:
 					queueRight = true;
 			}
 		}
-		else if (IsKeyDown(KEY_LEFT))
+		else if (IsKeyPressed(KEY_LEFT))
 		{
 			if (last == 1)
 				moveLeft();
@@ -206,7 +209,7 @@ public:
 			}
 			
 		}
-		else if (IsKeyDown(KEY_UP))
+		else if (IsKeyPressed(KEY_UP))
 
 		{
 			if (last == 4)
@@ -219,7 +222,7 @@ public:
 					queueUp = true;
 			}
 		}
-		else if (IsKeyDown(KEY_DOWN))
+		else if (IsKeyPressed(KEY_DOWN))
 		{
 			if (last == 3)
 				moveDown();
@@ -268,7 +271,6 @@ public:
 				pac_direction.x = -1;
 				if (queueDown)
 				{
-					std::cout << "Im called\n";
 					if (!checkNextCollisionDown())
 					{
 						last = 4;
@@ -332,7 +334,6 @@ public:
 					{
 						last = 2;
 						queueLeft = false;
-						return;
 					}
 				}
 				
@@ -356,7 +357,7 @@ public:
 
 		Rectangle Hitbox = getHitbox();
 		Hitbox.y += 10;
-		for (int i = 0; i < 366; i++)
+		for (int i = 0; i < 556; i++)
 		{
 			if (CheckCollisionRecs(Hitbox, Blocks[i]))
 			{
@@ -370,7 +371,7 @@ public:
 
 		Rectangle Hitbox = getHitbox();
 		Hitbox.y -= 10;
-		for (int i = 0; i < 366; i++)
+		for (int i = 0; i < 556; i++)
 		{
 			if (CheckCollisionRecs(Hitbox, Blocks[i]))
 			{
@@ -385,7 +386,7 @@ public:
 
 		Rectangle Hitbox = getHitbox();
 		Hitbox.x += 10;
-		for (int i = 0; i < 366; i++)
+		for (int i = 0; i < 556; i++)
 		{
 			if (CheckCollisionRecs(Hitbox, Blocks[i]))
 			{
@@ -400,7 +401,7 @@ public:
 
 		Rectangle Hitbox = getHitbox();
 		Hitbox.x -= 10;
-		for (int i = 0; i < 366; i++)
+		for (int i = 0; i < 556; i++)
 		{
 			if (CheckCollisionRecs(Hitbox, Blocks[i]))
 			{
@@ -434,7 +435,7 @@ public:
 	void checkCollisions(Rectangle rec[])
 	{
 		Rectangle hitbox = getHitbox();
-		for (int i = 0; i < 366; ++i)
+		for (int i = 0; i < 556; ++i)
 		{
 			if (CheckCollisionRecs(rec[i], hitbox))
 			{
@@ -457,7 +458,7 @@ public:
 	bool returnCheckCollisions(Rectangle rec[])
 	{
 		Rectangle hitbox = getHitbox();
-		for (int i = 0; i < 366; ++i)
+		for (int i = 0; i < 556; ++i)
 		{
 			if (CheckCollisionRecs(rec[i], hitbox))
 			{
@@ -561,7 +562,18 @@ private:
 
 };
 
+class Ghsots
+{
+public:
 
+
+
+
+
+private:
+	Vector2 ghost_position;
+
+};
 
 class Map {
 public:
@@ -585,7 +597,7 @@ public:
 
 
 					Rectangle block = { (float)x_position, (float)y_position, (float)blockSize, (float)blockSize };
-					if (blockCount < 366) {
+					if (blockCount < 556) {
 						Blocks[blockCount] = block;
 						blockCount++;
 					}
@@ -633,10 +645,10 @@ int main()
 	PacMan pac;
 	Fruits pacFruit;
 
-	pac.pacGrid(Grid, 22, 28);
+	pac.pacGrid(Grid, 31, 28);
 	while (!WindowShouldClose())
 	{
-		DrawTextEx(font, "Score:", scorePositionText, 25, 2, WHITE);
+		//DrawTextEx(font, "Score:", scorePositionText, 25, 2, WHITE);
 
 		BeginDrawing();
 
@@ -649,16 +661,16 @@ int main()
 			//pac.lastStatus();
 			pac.checkLogic();
 			pac.checkCollisions(Blocks);
-			pacFruit.createFruits(Grid, 21, 28);
+			pacFruit.createFruits(Grid, 30, 28);
 			pac.eatFruit();
 		}
 
 		ClearBackground(BLACK);
-		pacMap.createGrid(Grid, 22, 28);
+		pacMap.createGrid(Grid, 31, 28);
 		pac.Draw();
 
-		std::string score = std::to_string(game_score);
-		DrawTextEx(font, score.c_str(), scorePositonNum, 25, 2, WHITE);
+	/*	std::string score = std::to_string(game_score);
+		DrawTextEx(font, score.c_str(), scorePositonNum, 25, 2, WHITE);*/
 		EndDrawing();
 	}
 
