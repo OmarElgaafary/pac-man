@@ -1,18 +1,113 @@
 #include <raylib.h>
 #include <iostream>
 #include <string>
-
-int Xres = 560, Yres = 500;
-Rectangle Blocks[366];
-Vector2 scorePositionText = { 50, 450 };
-Vector2 scorePositonNum = { 150 ,450 };
+#include <cstdlib>
+//Globals
+int Xres = 560, Yres = 800;
+Rectangle Blocks[556];
+Rectangle Ghosts[4];
+Vector2 scorePositionText = { 50, 700 };
+Vector2 scorePositonNum = { 150 ,700 };
+bool moving = false;
 int game_score = 0;
+bool gameRunning = false;
+
+
+
+Font font = LoadFontEx("C:/Users/Omar/Desktop/Pac/pac-man/emulogic-font/font.ttf", 32, 0, 0);
+
+int Grid[31][28] = {
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+	{1,2,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1},
+	{1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1},
+	{1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1},
+	{1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1},
+	{1,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,1},
+	{1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1},
+	{1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1},
+	{1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1},
+	{1,1,1,1,1,1,0,1,1,0,1,1,3,3,3,3,1,1,0,1,1,0,1,1,1,1,1,1},
+	{1,1,1,1,1,1,0,1,1,0,1,3,3,3,3,3,3,1,0,1,1,0,1,1,1,1,1,1},
+	{1,0,0,0,0,0,0,0,0,0,1,3,3,3,3,3,3,1,0,0,0,0,0,0,0,0,0,1},
+	{1,1,1,1,1,1,0,1,1,0,1,3,3,3,3,3,3,1,0,1,1,0,1,1,1,1,1,1},
+	{1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1},
+	{1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1},
+	{1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1},
+	{1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1},
+	{1,0,0,0,1,1,0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0,1,1,0,0,0,1},
+	{1,1,1,0,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,0,1,1,1},
+	{1,1,1,0,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,0,1,1,1},
+	{1,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,1},
+	{1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1},
+	{1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+};
 
 struct Fruit_Item {
 	Rectangle fruit;
 	bool eaten = false;
 };
 Fruit_Item Fruit_Blocks[300];
+
+class check_collisions {
+public:
+	bool checkNextCollisionDown(Rectangle rec)
+	{
+		rec.y += 10;
+		for (int i = 0; i < 556; i++)
+		{
+			if (CheckCollisionRecs(rec, Blocks[i]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	bool checkNextCollisionUp(Rectangle rec)
+	{
+		rec.y -= 10;
+		for (int i = 0; i < 556; i++)
+		{
+			if (CheckCollisionRecs(rec, Blocks[i]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	bool checkNextCollisionRight(Rectangle rec)
+	{
+		rec.x += 10;
+		for (int i = 0; i < 556; i++)
+		{
+			if (CheckCollisionRecs(rec, Blocks[i]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool checkNextCollisionLeft(Rectangle rec)
+	{
+		rec.x -= 10;
+		for (int i = 0; i < 556; i++)
+		{
+			if (CheckCollisionRecs(rec, Blocks[i]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+};
 
 
 class Fruits {
@@ -43,6 +138,11 @@ public:
 					fruitCounter++;
 
 				}
+
+				if (Grid[i][j] == 3)
+				{
+					continue;
+				}
 			}
 		}
 	}
@@ -55,23 +155,8 @@ class PacMan {
 public:
 
 
-	void moveX(int pos)
+	void moveRight()
 	{
-		position.x = pos;
-		if (framerec.width < 0)
-			framerec.width = -framerec.width;
-		isVertical = false;
-	}
-	void moveY(int pos)
-	{
-		position.y = pos;
-		if (framerec.width < 0)
-			framerec.width = -framerec.width;
-		isVertical = true;
-	}
-
-
-	void moveRight() {
 		position.x += 2.5;
 		if (framerec.width < 0)
 			framerec.width = -framerec.width;
@@ -86,16 +171,17 @@ public:
 			framerec.width = -framerec.width;
 		isVertical = false;
 		last = 2;
+
 	}
 
 	void moveUp()
 	{
-
 		isVertical = true;
 		position.y -= 2.5;
 		if (framerec.height < 0)
 			framerec.height = -framerec.height;
 		last = 3;
+
 	}
 
 	void moveDown()
@@ -107,62 +193,236 @@ public:
 		last = 4;
 	}
 
-	void checkLogic() {	
+	void startMoving()
+	{
+		if (IsKeyDown(KEY_RIGHT))
+		{
+			last = 1;
+			moving = true;
+		}
+		else if (IsKeyDown(KEY_LEFT))
+		{
+			last = 2;
+			moving = true;
+		}
+		else if (IsKeyDown(KEY_UP))
+		{
+			last = 3;
+			moving = true;
+		}
+		else if (IsKeyDown(KEY_DOWN))
+		{
+			last = 4;
+			moving = true;
+		}
+	}
 
-		if (IsKeyDown(KEY_RIGHT) && IsKeyDown(KEY_LEFT))
-			return;
-
-		if (IsKeyDown(KEY_UP) && IsKeyDown(KEY_DOWN))
-			return;
+	void checkLogic() {
 
 		pac_direction.x = (float)IsKeyDown(KEY_RIGHT) - (float)IsKeyDown(KEY_LEFT);
 		pac_direction.y = (float)IsKeyDown(KEY_DOWN) - (float)IsKeyDown(KEY_UP);
 
+		check_collisions check;
 
-		if (IsKeyDown(KEY_RIGHT))
-			moveRight();
-		else if (IsKeyDown(KEY_LEFT))
-			moveLeft();
-		else if (IsKeyDown(KEY_UP))
-			moveUp();
-		else if (IsKeyDown(KEY_DOWN))
-			moveDown();
+		if (IsKeyPressed(KEY_RIGHT))
+		{
+			
+			if (last == 4 && check.checkNextCollisionDown(getHitbox()) && check.checkNextCollisionRight(getHitbox()))
+			{
+				last = 2;
+				return;
+			}
+
+			if (last == 3 && check.checkNextCollisionUp(getHitbox()) && check.checkNextCollisionRight(getHitbox()))
+			{
+				last = 2;
+				return;
+			}
+
+
+			if (last == 2)
+				moveRight();
+			else if (last == 3 || last == 4)
+			{
+				if (!check.checkNextCollisionRight(getHitbox()))
+					moveRight();
+				else
+					queueRight = true;
+			}
+		}
+		else if (IsKeyPressed(KEY_LEFT))
+		{
+			if (last == 4 && check.checkNextCollisionDown(getHitbox()) && check.checkNextCollisionLeft(getHitbox()))
+			{
+				last = 1;
+				return;
+			}
+
+			if (last == 3 && check.checkNextCollisionUp(getHitbox()) && check.checkNextCollisionLeft(getHitbox()))
+			{
+				last = 1;
+				return;
+			}
+
+
+
+			if (last == 1)
+				moveLeft();
+			else if (last == 3 || last == 4)
+			{
+				if (!check.checkNextCollisionLeft(getHitbox()))
+					moveLeft();
+				else
+				{
+					queueLeft = true;
+				}
+			}
+
+		}
+		else if (IsKeyPressed(KEY_UP))
+
+		{
+			if (last == 4)
+				moveUp();
+			else if (last == 1 || last == 2)
+			{
+				if (!check.checkNextCollisionUp(getHitbox()))
+					moveUp();
+				else
+					queueUp = true;
+			}
+		}
+		else if (IsKeyPressed(KEY_DOWN))
+		{
+			if (last == 3)
+				moveDown();
+			else if (last == 1 || last == 2)
+			{
+				if (!check.checkNextCollisionDown(getHitbox()))
+					moveDown();
+				else
+					queueDown = true;
+			}
+		}
 		else {
+
 			switch (last)
 			{
 			case 1:
-				if (collided) {
-					std::cout << "sound\n";
-				}
 				moveRight();
 				pac_direction.x = 1;
+
+				if (queueDown)
+				{
+					std::cout << "Im called\n";
+					if (!check.checkNextCollisionDown(getHitbox()))
+					{
+						last = 4;
+						queueDown = false;
+						return;
+					}
+				}
+
+				if (queueUp)
+				{
+					if (!check.checkNextCollisionUp(getHitbox()))
+					{
+						last = 3;
+						queueUp = false;
+						return;
+					}
+				}
+
+
 				break;
 			case 2:
-				if (collided)
-					return;
+
 				moveLeft();
 				pac_direction.x = -1;
+				if (queueDown)
+				{
+					if (!check.checkNextCollisionDown(getHitbox()))
+					{
+						last = 4;
+						queueDown = false;
+						return;
+					}
+				}
+
+				if (queueUp)
+				{
+					if (!check.checkNextCollisionUp(getHitbox()))
+					{
+						last = 3;
+						queueUp = false;
+						return;
+					}
+				}
+
 				break;
 			case 3:
-				if (collided)
-					return;
 				moveUp();
 				pac_direction.y = -1;
+				if (queueRight)
+				{
+					if (!check.checkNextCollisionRight(getHitbox()))
+					{
+						last = 1;
+						queueRight = false;
+						return;
+					}
+				}
+
+				if (queueLeft)
+				{
+					if (!check.checkNextCollisionLeft(getHitbox()))
+					{
+						last = 2;
+						queueLeft = false;
+						return;
+					}
+				}
+
+
 				break;
 			case 4:
-				if (collided)
-					return;
 				moveDown();
 				pac_direction.y = 1;
+				if (queueRight)
+				{
+					if (!check.checkNextCollisionRight(getHitbox()))
+					{
+						last = 1;
+						queueRight = false;
+						return;
+					}
+				}
+
+				if (queueLeft)
+				{
+					if (!check.checkNextCollisionLeft(getHitbox()))
+					{
+						last = 2;
+						queueLeft = false;
+					}
+				}
+
 			}
+
 		}
 
 
 
 
+		checkCollisions(getHitbox());
+
 		++frameIndex;
 		framerec.x = (float)frameWidth * frameIndex;
 	}
+
+
+
+	
 
 	void pacGrid(int array[][28], int length, int width)
 
@@ -184,11 +444,32 @@ public:
 	}
 
 
+	void checkCollisions(Rectangle rec)
+	{
+		for (int i = 0; i < 556; ++i)
+		{
+			if (CheckCollisionRecs(Blocks[i], rec))
+			{
+				if (pac_direction.x > 0)
+					position.x = Blocks[i].x - rec.width;
+				else if (pac_direction.x < 0)
+					position.x = Blocks[i].x + rec.width;
+				else if (pac_direction.y > 0)
+					position.y = Blocks[i].y - rec.height;
+				else if (pac_direction.y < 0)
+					position.y = Blocks[i].y + rec.height;
+				collision = true;
+				return;
+			}
 
-	void checkCollisions(Rectangle rec[])
+			collision = false;
+		}
+	}
+
+	bool returnCheckCollisions(Rectangle rec[])
 	{
 		Rectangle hitbox = getHitbox();
-		for (int i = 0; i < 366; ++i)
+		for (int i = 0; i < 556; ++i)
 		{
 			if (CheckCollisionRecs(rec[i], hitbox))
 			{
@@ -201,12 +482,11 @@ public:
 				else if (pac_direction.y < 0)
 					position.y = rec[i].y + hitbox.height;
 
-				collided = true;
-			}
-			else {
-				collided = false;
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	void Draw()
@@ -237,43 +517,337 @@ public:
 		}
 	}
 
-	void trackPosition(int array[][28], int length, int width)
-	{
-		for (int i = 0; i < length; ++i)
-		{
-			for (int j = 0; j < width; j++)
-			{
-				if (pac_direction.x == 1 && array[i][j + 1] == 0)
-				{
-					array[i][j + 1] = 2;
-					array[i][j];
-				}
-			}
-		}
-	}
-
 	void pos()
 	{
 		std::cout << "PAC (X): " << position.x << "\n";
 		std::cout << "PAC (Y): " << position.y << "\n";
 	}
 
+	void direction()
+	{
+		std::cout << "PAC DIRECTION (X): " << pac_direction.x << "\n";
+		std::cout << "PAC DIRECTION (Y): " << pac_direction.y << "\n";
+	}
+
+	void lastStatus()
+	{
+		std::cout << "Last: " << last << std::endl;
+	}
+
 
 private:
-	bool isVertical = false;
+
 	Texture2D pac_right = LoadTexture("C:/Users/Omar/Desktop/Pac/pac-man/pac-man-h.png");
 	Texture2D pac_up = LoadTexture("C:/Users/Omar/Desktop/Pac/pac-man/pac-man-v.png");
-	int frameWidth = pac_right.width / 9;
-	int frameIndex = 0;
+
 	Rectangle framerec = { 0.0f, 0.0f, (float)pac_right.width / 9 , (float)pac_right.height };
+
 	Vector2 position = { 20, 20 };
 	Vector2 pac_direction = { 1, 1 };
+
+	int frameWidth = pac_right.width / 9;
+	int frameIndex = 0;
 	int last = 0;
-	bool collided = false;
+
+	bool isVertical = false;
+	bool collision = false;
+	bool queueUp = false;
+	bool queueDown = false;
+	bool queueRight = false;
+	bool queueLeft = false;
 
 };
 
+struct availablePosition 
+{
+	int position;
+	bool availability;
+};
 
+class Ghost
+{
+public:
+
+	void createRedGhost()
+	{
+		Ghosts[ghostCount] = red_rec;
+		ghostCount++;
+	}
+
+	void red_ghost_move_left()
+
+	{
+		red_position.x += 5;
+
+	}
+
+	void updateRand()
+	{
+		int clock = time(0);
+		srand(clock);
+		
+	}
+
+	void moveRedGhost()
+	{
+
+		red_rec.x = red_position.x;
+		red_rec.y = red_position.y;
+
+
+		//check collision
+		
+
+		std::cout << redGhostLast << std::endl;
+
+
+		// checking available positions
+
+		check_collisions check;
+
+		if (!check.checkNextCollisionRight(red_rec))
+		{
+			available[0] = 1;
+		}
+		if (!check.checkNextCollisionLeft(red_rec))
+		{
+			available[1] = 2;
+		}
+		if (!check.checkNextCollisionUp(red_rec))
+		{
+			available[2] = 3;
+		}
+		if (!check.checkNextCollisionDown(red_rec))
+		{
+			available[3] = 4;
+		}
+
+		// check current direction
+
+		if (red_ghost_direction.x > 0)
+		{
+			red_ghost_direction.x = 1;
+			red_ghost_direction.y = 0;
+		}
+		else if (red_ghost_direction.x < 0)
+		{
+			red_ghost_direction.x = -1;
+			red_ghost_direction.y = 0;
+		}
+		else if (red_ghost_direction.y < 0)
+		{
+			red_ghost_direction.x = 0;
+			red_ghost_direction.y = -1;
+		}
+		else if (red_ghost_direction.y > 0)
+		{
+			red_ghost_direction.x = 0;
+			red_ghost_direction.y = 1;
+		}
+
+		if (redGhostLast == 0)
+		{
+			ranNum = (rand() % 4) + 1;
+			redGhostLast = ranNum;
+		}
+
+
+		// check for available positions 
+		int availableCount = 0;
+
+		for (int i = 0; i < 4; i++)
+		{
+			if (available[i] != 0)
+			{
+				availableCount++;
+			}
+		}
+		
+
+		 
+		// check available positons for movement
+
+
+		if (red_ghost_direction.y == 0)
+		{
+				if (checkNumAvailable(3) && checkNumAvailable(4))
+				{
+					// rand num
+
+					ranNum = ((rand() % 2) + 1) + 2;
+
+					redGhostLast = ranNum;
+
+
+				}
+				else if (checkNumAvailable(3) && !check.checkNextCollisionUp(red_rec))
+				{
+					// move up
+
+					redGhostLast = 3;
+				}
+				else if (checkNumAvailable(4) && !check.checkNextCollisionDown(red_rec))
+				{
+					// move down
+
+					redGhostLast = 4;
+				}
+		}
+
+		else if (red_ghost_direction.x == 0)
+			{
+				if (checkNumAvailable(1) && checkNumAvailable(2))
+				{
+					// rand num
+
+					ranNum = (rand() % 2) + 1;
+
+					redGhostLast = ranNum;
+				}
+				else if (checkNumAvailable(1) && !check.checkNextCollisionRight(red_rec))
+				{
+					// move right
+					redGhostLast = 1;
+				}
+				else if (checkNumAvailable(2) && !check.checkNextCollisionLeft(red_rec))
+				{
+					// move left
+					redGhostLast = 2;
+				}
+			}
+			
+		
+
+		// movement
+		
+		switch (redGhostLast)
+		{
+		case 1 : 
+			red_position.x += 5;
+			red_ghost_direction.x = 1;
+			red_ghost_direction.y = 0;
+
+			break;
+		case 2 :
+			red_position.x -= 5;
+			red_ghost_direction.x = -1;
+			red_ghost_direction.y = 0;
+
+			break;
+		case 3:
+			red_position.y -= 5;
+			red_ghost_direction.y = -1;
+			red_ghost_direction.x = 0;
+			break;
+		case 4:
+			red_position.y += 5;
+			red_ghost_direction.y = 1;
+			red_ghost_direction.x = 0;
+			break;
+		}
+
+		
+		
+		}
+	bool checkNumAvailable(int num)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			if (available[i] == num)
+				return true;
+		}
+		return false;
+	}
+
+	int collisionChange(int input)
+	{
+		int randNum = (rand() % 4) + 1;
+
+		if (randNum != input)
+			return randNum;
+		else 
+			return collisionChange(input);
+	}
+
+	Rectangle getGhostHitbox()
+	{
+		Rectangle hitbox = { red_position.x, red_position.y, red_ghost_texture.width, red_ghost_texture.height };
+			return hitbox;
+	}
+
+	void ghostCollision()
+	{
+		for (int i = 0; i < 566; ++i)
+		{
+			if (CheckCollisionRecs(getGhostHitbox(), Blocks[i]))
+			{
+				if (red_ghost_direction.x > 0)
+					red_position.x = Blocks[i].x - red_rec.width;
+				else if (red_ghost_direction.x < 0)
+					red_position.x = Blocks[i].x + red_rec.width;
+				else if (red_ghost_direction.y > 0)
+					red_position.y = Blocks[i].y - red_rec.height;
+				else if (red_ghost_direction.y < 0)
+					red_position.y = Blocks[i].y + red_rec.height;
+				redGhostCollided = true;
+				return;
+			}
+		}
+	}
+
+
+	bool checkGhostCollision()
+	{
+		for (int i = 0; i < 566; ++i)
+		{
+			if (CheckCollisionRecs(red_rec, Blocks[i]))
+			{
+				return true;
+				redGhostCollided = true;
+
+			}
+		}
+		redGhostCollided = false;
+
+		return false;
+	}
+
+	
+
+	void drawRedGhost()
+	{
+		DrawTextureRec(red_ghost_texture, red_rec, red_position, WHITE);
+	}
+
+	void checkGhostCollision(Rectangle rec)
+	{
+		
+			if (CheckCollisionRecs(rec, red_rec))
+			{
+				std::cout << "Game Over\n";
+				gameRunning = false;
+			}
+	}
+	
+	
+
+
+private:
+
+	Texture2D red_ghost_texture = LoadTexture("C:/Users/Omar/Desktop/Pac/pac-man/red_ghost.png");
+
+	Rectangle red_rec = { (float)red_position.x, (float)red_position.y , (float)red_ghost_texture.width, (float)red_ghost_texture.height};
+
+	Vector2 red_position = { 300, 250 };
+	Vector2 red_ghost_direction = { 1, 1 };
+
+	int ghostCount = 0;
+	int redGhostLast = 0;
+	int available[4] = { 0,0,0,0 };
+	int ranNum;
+	bool redGhostCollided = false;
+
+};
 
 class Map {
 public:
@@ -297,7 +871,7 @@ public:
 
 
 					Rectangle block = { (float)x_position, (float)y_position, (float)blockSize, (float)blockSize };
-					if (blockCount < 366) {
+					if (blockCount < 556) {
 						Blocks[blockCount] = block;
 						blockCount++;
 					}
@@ -317,87 +891,74 @@ public:
 			{
 				std::cout << array[i][j];
 			}
-			std::cout << "----------------------------------------------\n\n\n";
+			std::cout << "\n";
 		}
 	}
 
 
 private:
+
 	int blockCount = 0;
 	int blockSize = 20;
+
 	Color mapcolor = { 0,0,139,200 };
 	Rectangle pacMap = { 50, 50, 550, 650 };
 
-
-
 };
 
-
-
-int Grid[22][28] = {
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1},
-	{1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-	{0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0},
-	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-	{0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0},
-	{1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1},
-	{1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1},
-	{1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-};
-
-Font font = LoadFontEx("C:/Users/Omar/Desktop/Pac/pac-man/emulogic-font/font.ttf", 32, 0, 0);
 
 int main()
 
 {
 	SetTargetFPS(60);
-
+	SetTraceLogLevel(LOG_NONE);
 
 	InitWindow(Xres, Yres, "Pac-Man indevelopment by Omar Adly");
 
 	Map pacMap;
 	PacMan pac;
+	Ghost red_ghost;
 	Fruits pacFruit;
 
-	pac.pacGrid(Grid, 22, 28);
+	pac.pacGrid(Grid, 31, 28);
+	red_ghost.createRedGhost();
+
 	while (!WindowShouldClose())
 	{
 		DrawTextEx(font, "Score:", scorePositionText, 25, 2, WHITE);
 
 		BeginDrawing();
-		pac.checkLogic();
+		pac.Draw();
+		red_ghost.drawRedGhost();
 
-		pac.checkCollisions(Blocks);
-		pacFruit.createFruits(Grid, 21, 28);
-		pac.eatFruit();
+
+		if (!moving)
+		{
+			pac.startMoving();
+			gameRunning = true;
+		}
+		
+		if (gameRunning)
+		{
+			red_ghost.checkGhostCollision(pac.getHitbox());
+			pac.checkLogic();
+			red_ghost.moveRedGhost();
+			red_ghost.ghostCollision();
+			pac.eatFruit();
+			red_ghost.updateRand();
+		}
 
 		ClearBackground(BLACK);
 
-		pacMap.createGrid(Grid, 22, 28);
-		//pac.trackPosition(Grid, 22, 28);
-		//pacMap.displayScore();
-		pac.Draw();
+		pacFruit.createFruits(Grid, 30, 28);
+
+		pacMap.createGrid(Grid, 31, 28);
 
 		std::string score = std::to_string(game_score);
 		DrawTextEx(font, score.c_str(), scorePositonNum, 25, 2, WHITE);
-		pac.pos();
-
 		EndDrawing();
 	}
+
 	CloseWindow();
 
 	return 0;
