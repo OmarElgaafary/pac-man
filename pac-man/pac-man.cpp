@@ -411,7 +411,6 @@ public:
 		}
 		return false;
 	}
-
 	bool checkNextCollisionRight()
 	{
 
@@ -426,7 +425,6 @@ public:
 		}
 		return false;
 	}
-
 	bool checkNextCollisionLeft()
 	{
 
@@ -441,7 +439,6 @@ public:
 		}
 		return false;
 	}
-
 
 	void pacGrid(int array[][28], int length, int width)
 
@@ -537,21 +534,6 @@ public:
 		}
 	}
 
-	void trackPosition(int array[][28], int length, int width)
-	{
-		for (int i = 0; i < length; ++i)
-		{
-			for (int j = 0; j < width; j++)
-			{
-				if (pac_direction.x == 1 && array[i][j + 1] == 0)
-				{
-					array[i][j + 1] = 2;
-					array[i][j];
-				}
-			}
-		}
-	}
-
 	void pos()
 	{
 		std::cout << "PAC (X): " << position.x << "\n";
@@ -608,27 +590,24 @@ public:
 		DrawTextureRec(red_ghost_texture, red_rec, red_position, WHITE);
 	}
 
-	void checkGhostCollision()
+	void checkGhostCollision(Rectangle rec)
 	{
-		for (int i = 0; i < 4; ++i)
-		{
-			PacMan obj;
-			Rectangle Hitbox = obj.getHitbox();
-			if (CheckCollisionRecs(Hitbox, Ghosts[i]))
+		
+			if (CheckCollisionRecs(rec, red_rec))
 			{
+				std::cout << "Game Over\n";
 				gameRunning = false;
-				std::cout << "Colliding wirh Red Ghost\n";
 			}
-		}
 	}
 	
 	
 
 
 private:
+
 	Texture2D red_ghost_texture = LoadTexture("C:/Users/Omar/Desktop/Pac/pac-man/red_ghost.png");
 
-	Rectangle red_rec = {0.0f, 0.0f, (float)red_ghost_texture.width, (float)red_ghost_texture.height};
+	Rectangle red_rec = {300, 260 , (float)red_ghost_texture.width, (float)red_ghost_texture.height};
 
 	Vector2 red_position = { 300, 260 };
 
@@ -699,7 +678,7 @@ int main()
 
 {
 	SetTargetFPS(60);
-
+	SetTraceLogLevel(LOG_NONE);
 
 	InitWindow(Xres, Yres, "Pac-Man indevelopment by Omar Adly");
 
@@ -716,6 +695,9 @@ int main()
 		DrawTextEx(font, "Score:", scorePositionText, 25, 2, WHITE);
 
 		BeginDrawing();
+		red_ghost.drawRedGhost();
+		pac.Draw();
+
 
 		if (!moving)
 		{
@@ -726,11 +708,9 @@ int main()
 		if (gameRunning)
 		{
 			
-			red_ghost.checkGhostCollision();
+			red_ghost.checkGhostCollision(pac.getHitbox());
 			pac.checkLogic();
 			pac.checkCollisions(Blocks);
-			pac.Draw();
-			red_ghost.drawRedGhost();
 
 			pac.eatFruit();
 		}
