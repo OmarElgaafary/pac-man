@@ -3,12 +3,14 @@
 #include <string>
 
 //Globals
-int Xres = 560, Yres = 1000;
+int Xres = 560, Yres = 800;
 Rectangle Blocks[556];
-Vector2 scorePositionText = { 50, 450 };
-Vector2 scorePositonNum = { 150 ,450 };
+Rectangle Ghosts[4];
+Vector2 scorePositionText = { 50, 700 };
+Vector2 scorePositonNum = { 150 ,700 };
 bool moving = false;
 int game_score = 0;
+bool gameRunning = false;
 
 Font font = LoadFontEx("C:/Users/Omar/Desktop/Pac/pac-man/emulogic-font/font.ttf", 32, 0, 0);
 
@@ -25,7 +27,7 @@ int Grid[31][28] = {
 	{1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1},
 	{1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1},
 	{1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1},
-	{1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1},
+	{1,1,1,1,1,1,0,1,1,0,1,1,3,3,3,3,1,1,0,1,1,0,1,1,1,1,1,1},
 	{1,1,1,1,1,1,0,1,1,0,1,3,3,3,3,3,3,1,0,1,1,0,1,1,1,1,1,1},
 	{0,0,0,0,0,0,0,0,0,0,1,3,3,3,3,3,3,1,0,0,0,0,0,0,0,0,0,0},
 	{1,1,1,1,1,1,0,1,1,0,1,3,3,3,3,3,3,1,0,1,1,0,1,1,1,1,1,1},
@@ -181,7 +183,7 @@ public:
 		pac_direction.x = (float)IsKeyDown(KEY_RIGHT) - (float)IsKeyDown(KEY_LEFT);
 		pac_direction.y = (float)IsKeyDown(KEY_DOWN) - (float)IsKeyDown(KEY_UP);
 
-		
+
 
 		if (IsKeyPressed(KEY_RIGHT))
 		{
@@ -591,19 +593,47 @@ private:
 
 };
 
-class Ghosts
+class Ghost
 {
 public:
 
 	void createRedGhost()
 	{
-
+		Ghosts[ghostCount] = red_rec;
+		ghostCount++;
 	}
 
+	void drawRedGhost()
+	{
+		DrawTextureRec(red_ghost_texture, red_rec, red_position, WHITE);
+	}
+
+	void checkGhostCollision()
+	{
+		for (int i = 0; i < 4; ++i)
+		{
+			PacMan obj;
+			Rectangle Hitbox = obj.getHitbox();
+			if (CheckCollisionRecs(Hitbox, Ghosts[i]))
+			{
+				gameRunning = false;
+				std::cout << "Colliding wirh Red Ghost\n";
+			}
+		}
+	}
+	
+	
 
 
 private:
-	Vector2 ghost_position;
+	Texture2D red_ghost_texture = LoadTexture("C:/Users/Omar/Desktop/Pac/pac-man/red_ghost.png");
+
+	Rectangle red_rec = {0.0f, 0.0f, (float)red_ghost_texture.width, (float)red_ghost_texture.height};
+
+	Vector2 red_position = { 300, 260 };
+
+	int ghostCount = 0;
+
 
 };
 
@@ -675,35 +705,44 @@ int main()
 
 	Map pacMap;
 	PacMan pac;
+	Ghost red_ghost;
 	Fruits pacFruit;
 
 	pac.pacGrid(Grid, 31, 28);
+	red_ghost.createRedGhost();
+
 	while (!WindowShouldClose())
 	{
-		//DrawTextEx(font, "Score:", scorePositionText, 25, 2, WHITE);
+		DrawTextEx(font, "Score:", scorePositionText, 25, 2, WHITE);
 
 		BeginDrawing();
 
 		if (!moving)
 		{
 			pac.startMoving();
+			gameRunning = true;
 		}
-		else
+		
+		if (gameRunning)
 		{
-			//pac.lastStatus();
+			
+			red_ghost.checkGhostCollision();
 			pac.checkLogic();
 			pac.checkCollisions(Blocks);
-			pacFruit.createFruits(Grid, 30, 28);
+			pac.Draw();
+			red_ghost.drawRedGhost();
+
 			pac.eatFruit();
-			pac.pos();
 		}
 
 		ClearBackground(BLACK);
-		pacMap.createGrid(Grid, 31, 28);
-		pac.Draw();
 
-		/*	std::string score = std::to_string(game_score);
-			DrawTextEx(font, score.c_str(), scorePositonNum, 25, 2, WHITE);*/
+		pacFruit.createFruits(Grid, 30, 28);
+
+		pacMap.createGrid(Grid, 31, 28);
+
+		std::string score = std::to_string(game_score);
+		DrawTextEx(font, score.c_str(), scorePositonNum, 25, 2, WHITE);
 		EndDrawing();
 	}
 
