@@ -1,7 +1,7 @@
 #include <raylib.h>
 #include <iostream>
 #include <string>
-
+#include <cstdlib>
 //Globals
 int Xres = 560, Yres = 800;
 Rectangle Blocks[556];
@@ -11,6 +11,8 @@ Vector2 scorePositonNum = { 150 ,700 };
 bool moving = false;
 int game_score = 0;
 bool gameRunning = false;
+
+
 
 Font font = LoadFontEx("C:/Users/Omar/Desktop/Pac/pac-man/emulogic-font/font.ttf", 32, 0, 0);
 
@@ -579,18 +581,22 @@ public:
 
 	}
 
+	void updateRand()
+	{
+		int clock = time(0);
+		srand(clock);
+		
+	}
 
 	void moveRedGhost()
 	{
+
 		red_rec.x = red_position.x;
 		red_rec.y = red_position.y;
 
-		int clock = time(0);
-		srand(clock);
-		int ranNum;
 
 		//check collision
-		ghostCollision();
+		
 
 		std::cout << redGhostLast << std::endl;
 
@@ -639,6 +645,13 @@ public:
 			red_ghost_direction.y = 1;
 		}
 
+		if (redGhostLast == 0)
+		{
+			ranNum = (rand() % 4) + 1;
+			redGhostLast = ranNum;
+		}
+
+
 		// check for available positions 
 		int availableCount = 0;
 
@@ -650,99 +663,59 @@ public:
 			}
 		}
 		
+
+		 
 		// check available positons for movement
 
-		if (red_ghost_direction.y == 0 && red_ghost_direction.x == 1)
+
+		if (red_ghost_direction.y == 0)
 		{
-			if (checkNumAvailable(3) && checkNumAvailable(4))
-			{
-				// rand num
+				if (checkNumAvailable(3) && checkNumAvailable(4))
+				{
+					// rand num
 
-				ranNum = ((rand() % 2) + 1) + 2;
+					ranNum = ((rand() % 2) + 1) + 2;
 
-				redGhostLast = ranNum;
+					redGhostLast = ranNum;
 
 
-			}
-			else if (checkNumAvailable(3))
-			{
-				// move up
+				}
+				else if (checkNumAvailable(3) && !check.checkNextCollisionUp(red_rec))
+				{
+					// move up
 
-				redGhostLast = 3;
-			}
-			else if (checkNumAvailable(4))
-			{
-				// move down
+					redGhostLast = 3;
+				}
+				else if (checkNumAvailable(4) && !check.checkNextCollisionDown(red_rec))
+				{
+					// move down
 
-				redGhostLast = 4;
-			}
-		}
-		else if (red_ghost_direction.y == 0 && red_ghost_direction.x == -1)
-		{
-			if (checkNumAvailable(3) && checkNumAvailable(4))
-			{
-				// rand num
-
-				ranNum = ((rand() % 2) + 1) + 2;
-
-				redGhostLast = ranNum;
-
-			}
-			else if (checkNumAvailable(3))
-			{
-				// move up
-				redGhostLast = 3;
-			}
-			else if (checkNumAvailable(4))
-			{
-				// move down
-				redGhostLast = 4;
-			}
+					redGhostLast = 4;
+				}
 		}
 
-		if (red_ghost_direction.x == 0 && red_ghost_direction.y == -1)
-		{
-			if (checkNumAvailable(1) && checkNumAvailable(2))
+		else if (red_ghost_direction.x == 0)
 			{
-				// rand num
+				if (checkNumAvailable(1) && checkNumAvailable(2))
+				{
+					// rand num
 
-				ranNum = (rand() % 2) + 1;
+					ranNum = (rand() % 2) + 1;
 
-				redGhostLast = ranNum;
+					redGhostLast = ranNum;
+				}
+				else if (checkNumAvailable(1) && !check.checkNextCollisionRight(red_rec))
+				{
+					// move right
+					redGhostLast = 1;
+				}
+				else if (checkNumAvailable(2) && !check.checkNextCollisionLeft(red_rec))
+				{
+					// move left
+					redGhostLast = 2;
+				}
 			}
-			else if (checkNumAvailable(1))
-			{
-				// move right
-			}
-			else if (checkNumAvailable(2))
-			{
-				// move left
-			}
-		}
-		else if (red_ghost_direction.x == 0 && red_ghost_direction.y == 1)
-		{
-			if (checkNumAvailable(1) && checkNumAvailable(2))
-			{
-				// rand num
-
-				ranNum = (rand() % 2) + 1;
-
-				redGhostLast = ranNum;
-			}
-			else if (checkNumAvailable(1))
-			{
-				// move right
-				
-				redGhostLast = 1;
-			}
-			else if (checkNumAvailable(2))
-			{
-				// move left
-
-				redGhostLast = 2;
-			}
-		}
-		
+			
 		
 
 		// movement
@@ -753,11 +726,13 @@ public:
 			red_position.x += 5;
 			red_ghost_direction.x = 1;
 			red_ghost_direction.y = 0;
+
 			break;
 		case 2 :
 			red_position.x -= 5;
 			red_ghost_direction.x = -1;
 			red_ghost_direction.y = 0;
+
 			break;
 		case 3:
 			red_position.y -= 5;
@@ -806,7 +781,6 @@ public:
 		{
 			if (CheckCollisionRecs(getGhostHitbox(), Blocks[i]))
 			{
-				std::cout << "collided\n";
 				if (red_ghost_direction.x > 0)
 					red_position.x = Blocks[i].x - red_rec.width;
 				else if (red_ghost_direction.x < 0)
@@ -868,9 +842,9 @@ private:
 	Vector2 red_ghost_direction = { 1, 1 };
 
 	int ghostCount = 0;
-	int redGhostLast = 3;
+	int redGhostLast = 0;
 	int available[4] = { 0,0,0,0 };
-
+	int ranNum;
 	bool redGhostCollided = false;
 
 };
@@ -969,7 +943,9 @@ int main()
 			red_ghost.checkGhostCollision(pac.getHitbox());
 			pac.checkLogic();
 			red_ghost.moveRedGhost();
+			red_ghost.ghostCollision();
 			pac.eatFruit();
+			red_ghost.updateRand();
 		}
 
 		ClearBackground(BLACK);
