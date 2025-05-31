@@ -29,7 +29,7 @@ int Grid[31][28] = {
 	{1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1},
 	{1,1,1,1,1,1,0,1,1,0,1,1,3,3,3,3,1,1,0,1,1,0,1,1,1,1,1,1},
 	{1,1,1,1,1,1,0,1,1,0,1,3,3,3,3,3,3,1,0,1,1,0,1,1,1,1,1,1},
-	{0,0,0,0,0,0,0,0,0,0,1,3,3,3,3,3,3,1,0,0,0,0,0,0,0,0,0,0},
+	{1,0,0,0,0,0,0,0,0,0,1,3,3,3,3,3,3,1,0,0,0,0,0,0,0,0,0,1},
 	{1,1,1,1,1,1,0,1,1,0,1,3,3,3,3,3,3,1,0,1,1,0,1,1,1,1,1,1},
 	{1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1},
 	{1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1},
@@ -53,6 +53,59 @@ struct Fruit_Item {
 	bool eaten = false;
 };
 Fruit_Item Fruit_Blocks[300];
+
+class check_collisions {
+public:
+	bool checkNextCollisionDown(Rectangle rec)
+	{
+		rec.y += 10;
+		for (int i = 0; i < 556; i++)
+		{
+			if (CheckCollisionRecs(rec, Blocks[i]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	bool checkNextCollisionUp(Rectangle rec)
+	{
+		rec.y -= 10;
+		for (int i = 0; i < 556; i++)
+		{
+			if (CheckCollisionRecs(rec, Blocks[i]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	bool checkNextCollisionRight(Rectangle rec)
+	{
+		rec.x += 10;
+		for (int i = 0; i < 556; i++)
+		{
+			if (CheckCollisionRecs(rec, Blocks[i]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool checkNextCollisionLeft(Rectangle rec)
+	{
+		rec.x -= 10;
+		for (int i = 0; i < 556; i++)
+		{
+			if (CheckCollisionRecs(rec, Blocks[i]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+};
 
 
 class Fruits {
@@ -98,22 +151,6 @@ private:
 
 class PacMan {
 public:
-
-
-	void moveX(int pos)
-	{
-		position.x = pos;
-		if (framerec.width < 0)
-			framerec.width = -framerec.width;
-		isVertical = false;
-	}
-	void moveY(int pos)
-	{
-		position.y = pos;
-		if (framerec.width < 0)
-			framerec.width = -framerec.width;
-		isVertical = true;
-	}
 
 
 	void moveRight()
@@ -183,18 +220,18 @@ public:
 		pac_direction.x = (float)IsKeyDown(KEY_RIGHT) - (float)IsKeyDown(KEY_LEFT);
 		pac_direction.y = (float)IsKeyDown(KEY_DOWN) - (float)IsKeyDown(KEY_UP);
 
-
+		check_collisions check;
 
 		if (IsKeyPressed(KEY_RIGHT))
 		{
 			
-			if (last == 4 && checkNextCollisionDown() && checkNextCollisionRight())
+			if (last == 4 && check.checkNextCollisionDown(getHitbox()) && check.checkNextCollisionRight(getHitbox()))
 			{
 				last = 2;
 				return;
 			}
 
-			if (last == 3 && checkNextCollisionUp() && checkNextCollisionRight())
+			if (last == 3 && check.checkNextCollisionUp(getHitbox()) && check.checkNextCollisionRight(getHitbox()))
 			{
 				last = 2;
 				return;
@@ -205,7 +242,7 @@ public:
 				moveRight();
 			else if (last == 3 || last == 4)
 			{
-				if (!checkNextCollisionRight())
+				if (!check.checkNextCollisionRight(getHitbox()))
 					moveRight();
 				else
 					queueRight = true;
@@ -213,13 +250,13 @@ public:
 		}
 		else if (IsKeyPressed(KEY_LEFT))
 		{
-			if (last == 4 && checkNextCollisionDown() && checkNextCollisionLeft())
+			if (last == 4 && check.checkNextCollisionDown(getHitbox()) && check.checkNextCollisionLeft(getHitbox()))
 			{
 				last = 1;
 				return;
 			}
 
-			if (last == 3 && checkNextCollisionUp() && checkNextCollisionLeft())
+			if (last == 3 && check.checkNextCollisionUp(getHitbox()) && check.checkNextCollisionLeft(getHitbox()))
 			{
 				last = 1;
 				return;
@@ -231,7 +268,7 @@ public:
 				moveLeft();
 			else if (last == 3 || last == 4)
 			{
-				if (!checkNextCollisionLeft())
+				if (!check.checkNextCollisionLeft(getHitbox()))
 					moveLeft();
 				else
 				{
@@ -247,7 +284,7 @@ public:
 				moveUp();
 			else if (last == 1 || last == 2)
 			{
-				if (!checkNextCollisionUp())
+				if (!check.checkNextCollisionUp(getHitbox()))
 					moveUp();
 				else
 					queueUp = true;
@@ -259,7 +296,7 @@ public:
 				moveDown();
 			else if (last == 1 || last == 2)
 			{
-				if (!checkNextCollisionDown())
+				if (!check.checkNextCollisionDown(getHitbox()))
 					moveDown();
 				else
 					queueDown = true;
@@ -276,7 +313,7 @@ public:
 				if (queueDown)
 				{
 					std::cout << "Im called\n";
-					if (!checkNextCollisionDown())
+					if (!check.checkNextCollisionDown(getHitbox()))
 					{
 						last = 4;
 						queueDown = false;
@@ -286,7 +323,7 @@ public:
 
 				if (queueUp)
 				{
-					if (!checkNextCollisionUp())
+					if (!check.checkNextCollisionUp(getHitbox()))
 					{
 						last = 3;
 						queueUp = false;
@@ -302,7 +339,7 @@ public:
 				pac_direction.x = -1;
 				if (queueDown)
 				{
-					if (!checkNextCollisionDown())
+					if (!check.checkNextCollisionDown(getHitbox()))
 					{
 						last = 4;
 						queueDown = false;
@@ -312,7 +349,7 @@ public:
 
 				if (queueUp)
 				{
-					if (!checkNextCollisionUp())
+					if (!check.checkNextCollisionUp(getHitbox()))
 					{
 						last = 3;
 						queueUp = false;
@@ -326,7 +363,7 @@ public:
 				pac_direction.y = -1;
 				if (queueRight)
 				{
-					if (!checkNextCollisionRight())
+					if (!check.checkNextCollisionRight(getHitbox()))
 					{
 						last = 1;
 						queueRight = false;
@@ -336,7 +373,7 @@ public:
 
 				if (queueLeft)
 				{
-					if (!checkNextCollisionLeft())
+					if (!check.checkNextCollisionLeft(getHitbox()))
 					{
 						last = 2;
 						queueLeft = false;
@@ -351,7 +388,7 @@ public:
 				pac_direction.y = 1;
 				if (queueRight)
 				{
-					if (!checkNextCollisionRight())
+					if (!check.checkNextCollisionRight(getHitbox()))
 					{
 						last = 1;
 						queueRight = false;
@@ -361,7 +398,7 @@ public:
 
 				if (queueLeft)
 				{
-					if (!checkNextCollisionLeft())
+					if (!check.checkNextCollisionLeft(getHitbox()))
 					{
 						last = 2;
 						queueLeft = false;
@@ -375,7 +412,7 @@ public:
 
 
 
-
+		checkCollisions(getHitbox());
 
 		++frameIndex;
 		framerec.x = (float)frameWidth * frameIndex;
@@ -383,62 +420,7 @@ public:
 
 
 
-	bool checkNextCollisionDown()
-	{
-
-		Rectangle Hitbox = getHitbox();
-		Hitbox.y += 10;
-		for (int i = 0; i < 556; i++)
-		{
-			if (CheckCollisionRecs(Hitbox, Blocks[i]))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	bool checkNextCollisionUp()
-	{
-
-		Rectangle Hitbox = getHitbox();
-		Hitbox.y -= 10;
-		for (int i = 0; i < 556; i++)
-		{
-			if (CheckCollisionRecs(Hitbox, Blocks[i]))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	bool checkNextCollisionRight()
-	{
-
-		Rectangle Hitbox = getHitbox();
-		Hitbox.x += 10;
-		for (int i = 0; i < 556; i++)
-		{
-			if (CheckCollisionRecs(Hitbox, Blocks[i]))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	bool checkNextCollisionLeft()
-	{
-
-		Rectangle Hitbox = getHitbox();
-		Hitbox.x -= 10;
-		for (int i = 0; i < 556; i++)
-		{
-			if (CheckCollisionRecs(Hitbox, Blocks[i]))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
+	
 
 	void pacGrid(int array[][28], int length, int width)
 
@@ -460,21 +442,20 @@ public:
 	}
 
 
-	void checkCollisions(Rectangle rec[])
+	void checkCollisions(Rectangle rec)
 	{
-		Rectangle hitbox = getHitbox();
 		for (int i = 0; i < 556; ++i)
 		{
-			if (CheckCollisionRecs(rec[i], hitbox))
+			if (CheckCollisionRecs(Blocks[i], rec))
 			{
 				if (pac_direction.x > 0)
-					position.x = rec[i].x - hitbox.width;
+					position.x = Blocks[i].x - rec.width;
 				else if (pac_direction.x < 0)
-					position.x = rec[i].x + hitbox.width;
+					position.x = Blocks[i].x + rec.width;
 				else if (pac_direction.y > 0)
-					position.y = rec[i].y - hitbox.height;
+					position.y = Blocks[i].y - rec.height;
 				else if (pac_direction.y < 0)
-					position.y = rec[i].y + hitbox.height;
+					position.y = Blocks[i].y + rec.height;
 				collision = true;
 				return;
 			}
@@ -575,6 +556,12 @@ private:
 
 };
 
+struct availablePosition 
+{
+	int position;
+	bool availability;
+};
+
 class Ghost
 {
 public:
@@ -584,6 +571,274 @@ public:
 		Ghosts[ghostCount] = red_rec;
 		ghostCount++;
 	}
+
+	void red_ghost_move_left()
+
+	{
+		red_position.x += 5;
+
+	}
+
+
+	void moveRedGhost()
+	{
+		red_rec.x = red_position.x;
+		red_rec.y = red_position.y;
+
+		int clock = time(0);
+		srand(clock);
+		int ranNum;
+
+		//check collision
+		ghostCollision();
+
+		std::cout << redGhostLast << std::endl;
+
+
+		// checking available positions
+
+		check_collisions check;
+
+		if (!check.checkNextCollisionRight(red_rec))
+		{
+			available[0] = 1;
+		}
+		if (!check.checkNextCollisionLeft(red_rec))
+		{
+			available[1] = 2;
+		}
+		if (!check.checkNextCollisionUp(red_rec))
+		{
+			available[2] = 3;
+		}
+		if (!check.checkNextCollisionDown(red_rec))
+		{
+			available[3] = 4;
+		}
+
+		// check current direction
+
+		if (red_ghost_direction.x > 0)
+		{
+			red_ghost_direction.x = 1;
+			red_ghost_direction.y = 0;
+		}
+		else if (red_ghost_direction.x < 0)
+		{
+			red_ghost_direction.x = -1;
+			red_ghost_direction.y = 0;
+		}
+		else if (red_ghost_direction.y < 0)
+		{
+			red_ghost_direction.x = 0;
+			red_ghost_direction.y = -1;
+		}
+		else if (red_ghost_direction.y > 0)
+		{
+			red_ghost_direction.x = 0;
+			red_ghost_direction.y = 1;
+		}
+
+		// check for available positions 
+		int availableCount = 0;
+
+		for (int i = 0; i < 4; i++)
+		{
+			if (available[i] != 0)
+			{
+				availableCount++;
+			}
+		}
+		
+		// check available positons for movement
+
+		if (red_ghost_direction.y == 0 && red_ghost_direction.x == 1)
+		{
+			if (checkNumAvailable(3) && checkNumAvailable(4))
+			{
+				// rand num
+
+				ranNum = ((rand() % 2) + 1) + 2;
+
+				redGhostLast = ranNum;
+
+
+			}
+			else if (checkNumAvailable(3))
+			{
+				// move up
+
+				redGhostLast = 3;
+			}
+			else if (checkNumAvailable(4))
+			{
+				// move down
+
+				redGhostLast = 4;
+			}
+		}
+		else if (red_ghost_direction.y == 0 && red_ghost_direction.x == -1)
+		{
+			if (checkNumAvailable(3) && checkNumAvailable(4))
+			{
+				// rand num
+
+				ranNum = ((rand() % 2) + 1) + 2;
+
+				redGhostLast = ranNum;
+
+			}
+			else if (checkNumAvailable(3))
+			{
+				// move up
+				redGhostLast = 3;
+			}
+			else if (checkNumAvailable(4))
+			{
+				// move down
+				redGhostLast = 4;
+			}
+		}
+
+		if (red_ghost_direction.x == 0 && red_ghost_direction.y == -1)
+		{
+			if (checkNumAvailable(1) && checkNumAvailable(2))
+			{
+				// rand num
+
+				ranNum = (rand() % 2) + 1;
+
+				redGhostLast = ranNum;
+			}
+			else if (checkNumAvailable(1))
+			{
+				// move right
+			}
+			else if (checkNumAvailable(2))
+			{
+				// move left
+			}
+		}
+		else if (red_ghost_direction.x == 0 && red_ghost_direction.y == 1)
+		{
+			if (checkNumAvailable(1) && checkNumAvailable(2))
+			{
+				// rand num
+
+				ranNum = (rand() % 2) + 1;
+
+				redGhostLast = ranNum;
+			}
+			else if (checkNumAvailable(1))
+			{
+				// move right
+				
+				redGhostLast = 1;
+			}
+			else if (checkNumAvailable(2))
+			{
+				// move left
+
+				redGhostLast = 2;
+			}
+		}
+		
+		
+
+		// movement
+		
+		switch (redGhostLast)
+		{
+		case 1 : 
+			red_position.x += 5;
+			red_ghost_direction.x = 1;
+			red_ghost_direction.y = 0;
+			break;
+		case 2 :
+			red_position.x -= 5;
+			red_ghost_direction.x = -1;
+			red_ghost_direction.y = 0;
+			break;
+		case 3:
+			red_position.y -= 5;
+			red_ghost_direction.y = -1;
+			red_ghost_direction.x = 0;
+			break;
+		case 4:
+			red_position.y += 5;
+			red_ghost_direction.y = 1;
+			red_ghost_direction.x = 0;
+			break;
+		}
+
+		
+		
+		}
+	bool checkNumAvailable(int num)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			if (available[i] == num)
+				return true;
+		}
+		return false;
+	}
+
+	int collisionChange(int input)
+	{
+		int randNum = (rand() % 4) + 1;
+
+		if (randNum != input)
+			return randNum;
+		else 
+			return collisionChange(input);
+	}
+
+	Rectangle getGhostHitbox()
+	{
+		Rectangle hitbox = { red_position.x, red_position.y, red_ghost_texture.width, red_ghost_texture.height };
+			return hitbox;
+	}
+
+	void ghostCollision()
+	{
+		for (int i = 0; i < 566; ++i)
+		{
+			if (CheckCollisionRecs(getGhostHitbox(), Blocks[i]))
+			{
+				std::cout << "collided\n";
+				if (red_ghost_direction.x > 0)
+					red_position.x = Blocks[i].x - red_rec.width;
+				else if (red_ghost_direction.x < 0)
+					red_position.x = Blocks[i].x + red_rec.width;
+				else if (red_ghost_direction.y > 0)
+					red_position.y = Blocks[i].y - red_rec.height;
+				else if (red_ghost_direction.y < 0)
+					red_position.y = Blocks[i].y + red_rec.height;
+				redGhostCollided = true;
+				return;
+			}
+		}
+	}
+
+
+	bool checkGhostCollision()
+	{
+		for (int i = 0; i < 566; ++i)
+		{
+			if (CheckCollisionRecs(red_rec, Blocks[i]))
+			{
+				return true;
+				redGhostCollided = true;
+
+			}
+		}
+		redGhostCollided = false;
+
+		return false;
+	}
+
+	
 
 	void drawRedGhost()
 	{
@@ -607,12 +862,16 @@ private:
 
 	Texture2D red_ghost_texture = LoadTexture("C:/Users/Omar/Desktop/Pac/pac-man/red_ghost.png");
 
-	Rectangle red_rec = {300, 260 , (float)red_ghost_texture.width, (float)red_ghost_texture.height};
+	Rectangle red_rec = { (float)red_position.x, (float)red_position.y , (float)red_ghost_texture.width, (float)red_ghost_texture.height};
 
-	Vector2 red_position = { 300, 260 };
+	Vector2 red_position = { 300, 250 };
+	Vector2 red_ghost_direction = { 1, 1 };
 
 	int ghostCount = 0;
+	int redGhostLast = 3;
+	int available[4] = { 0,0,0,0 };
 
+	bool redGhostCollided = false;
 
 };
 
@@ -695,8 +954,8 @@ int main()
 		DrawTextEx(font, "Score:", scorePositionText, 25, 2, WHITE);
 
 		BeginDrawing();
-		red_ghost.drawRedGhost();
 		pac.Draw();
+		red_ghost.drawRedGhost();
 
 
 		if (!moving)
@@ -707,11 +966,9 @@ int main()
 		
 		if (gameRunning)
 		{
-			
 			red_ghost.checkGhostCollision(pac.getHitbox());
 			pac.checkLogic();
-			pac.checkCollisions(Blocks);
-
+			red_ghost.moveRedGhost();
 			pac.eatFruit();
 		}
 
