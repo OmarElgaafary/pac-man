@@ -4,7 +4,9 @@
 #include <cstdlib>
 //Globals
 int Xres = 560, Yres = 800;
-Rectangle Blocks[556];
+const int blockAmount = 556;
+
+Rectangle Blocks[blockAmount];
 Rectangle Ghosts[4];
 Vector2 scorePositionText = { 50, 700 };
 Vector2 scorePositonNum = { 150 ,700 };
@@ -61,7 +63,7 @@ public:
 	bool checkNextCollisionDown(Rectangle rec)
 	{
 		rec.y += 10;
-		for (int i = 0; i < 556; i++)
+		for (int i = 0; i < blockAmount; i++)
 		{
 			if (CheckCollisionRecs(rec, Blocks[i]))
 			{
@@ -73,7 +75,7 @@ public:
 	bool checkNextCollisionUp(Rectangle rec)
 	{
 		rec.y -= 10;
-		for (int i = 0; i < 556; i++)
+		for (int i = 0; i < blockAmount; i++)
 		{
 			if (CheckCollisionRecs(rec, Blocks[i]))
 			{
@@ -85,7 +87,7 @@ public:
 	bool checkNextCollisionRight(Rectangle rec)
 	{
 		rec.x += 10;
-		for (int i = 0; i < 556; i++)
+		for (int i = 0; i < blockAmount; i++)
 		{
 			if (CheckCollisionRecs(rec, Blocks[i]))
 			{
@@ -98,7 +100,7 @@ public:
 	bool checkNextCollisionLeft(Rectangle rec)
 	{
 		rec.x -= 10;
-		for (int i = 0; i < 556; i++)
+		for (int i = 0; i < blockAmount; i++)
 		{
 			if (CheckCollisionRecs(rec, Blocks[i]))
 			{
@@ -446,7 +448,7 @@ public:
 
 	void checkCollisions(Rectangle rec)
 	{
-		for (int i = 0; i < 556; ++i)
+		for (int i = 0; i < blockAmount; ++i)
 		{
 			if (CheckCollisionRecs(Blocks[i], rec))
 			{
@@ -469,7 +471,7 @@ public:
 	bool returnCheckCollisions(Rectangle rec[])
 	{
 		Rectangle hitbox = getHitbox();
-		for (int i = 0; i < 556; ++i)
+		for (int i = 0; i < blockAmount; ++i)
 		{
 			if (CheckCollisionRecs(rec[i], hitbox))
 			{
@@ -568,11 +570,7 @@ class Ghost
 {
 public:
 
-	void createRedGhost()
-	{
-		Ghosts[ghostCount] = red_rec;
-		ghostCount++;
-	}
+	check_collisions check;
 
 	void red_ghost_move_left()
 
@@ -588,71 +586,69 @@ public:
 		
 	}
 
-	void moveRedGhost()
+	void redGhost()
 	{
+		drawRedGhost();
+		createGhost(red_rec, red_position, red_direction, redGhostLast);
+		ghostCollision(red_rec);
+	}
 
+	void blueGhost()
+	{
+		drawBlueGhost();
+		createGhost(blue_rec, blue_position, blue_direction, blueGhostLast);
+		ghostCollision(blue_rec);
+	}
+
+	void createGhost(Rectangle& rec, Vector2& Position, Vector2& direction, int& GhostLast)
+	{
 		red_rec.x = red_position.x;
 		red_rec.y = red_position.y;
 
-
-		//check collision
-		
-
-		std::cout << redGhostLast << std::endl;
-
-
-		// checking available positions
-
-		check_collisions check;
-
-		if (!check.checkNextCollisionRight(red_rec))
+		if (!check.checkNextCollisionRight(rec))
 		{
 			available[0] = 1;
 		}
-		if (!check.checkNextCollisionLeft(red_rec))
+		if (!check.checkNextCollisionLeft(rec))
 		{
 			available[1] = 2;
 		}
-		if (!check.checkNextCollisionUp(red_rec))
+		if (!check.checkNextCollisionUp(rec))
 		{
 			available[2] = 3;
 		}
-		if (!check.checkNextCollisionDown(red_rec))
+		if (!check.checkNextCollisionDown(rec))
 		{
 			available[3] = 4;
 		}
 
-		// check current direction
-
-		if (red_ghost_direction.x > 0)
+		if (direction.x > 0)
 		{
-			red_ghost_direction.x = 1;
-			red_ghost_direction.y = 0;
+			direction.x = 1;
+			direction.y = 0;
 		}
-		else if (red_ghost_direction.x < 0)
+		else if (direction.x < 0)
 		{
-			red_ghost_direction.x = -1;
-			red_ghost_direction.y = 0;
+			direction.x = -1;
+			direction.y = 0;
 		}
-		else if (red_ghost_direction.y < 0)
+		else if (direction.y < 0)
 		{
-			red_ghost_direction.x = 0;
-			red_ghost_direction.y = -1;
+			direction.x = 0;
+			direction.y = -1;
 		}
-		else if (red_ghost_direction.y > 0)
+		else if (direction.y > 0)
 		{
-			red_ghost_direction.x = 0;
-			red_ghost_direction.y = 1;
+			direction.x = 0;
+			direction.y = 1;
 		}
 
-		if (redGhostLast == 0)
+		if (GhostLast == 0)
 		{
 			ranNum = (rand() % 4) + 1;
-			redGhostLast = ranNum;
+			GhostLast = ranNum;
 		}
 
-
-		// check for available positions 
 		int availableCount = 0;
 
 		for (int i = 0; i < 4; i++)
@@ -662,93 +658,96 @@ public:
 				availableCount++;
 			}
 		}
-		
 
-		 
+
+
 		// check available positons for movement
 
 
-		if (red_ghost_direction.y == 0)
+		if (direction.y == 0)
 		{
-				if (checkNumAvailable(3) && checkNumAvailable(4))
-				{
-					// rand num
+			if (checkNumAvailable(3) && checkNumAvailable(4))
+			{
+				// rand num
 
-					ranNum = ((rand() % 2) + 1) + 2;
+				ranNum = ((rand() % 2) + 1) + 2;
 
-					redGhostLast = ranNum;
+				GhostLast = ranNum;
 
 
-				}
-				else if (checkNumAvailable(3) && !check.checkNextCollisionUp(red_rec))
-				{
-					// move up
+			}
+			else if (checkNumAvailable(3) && !check.checkNextCollisionUp(rec))
+			{
+				// move up
 
-					redGhostLast = 3;
-				}
-				else if (checkNumAvailable(4) && !check.checkNextCollisionDown(red_rec))
-				{
-					// move down
+				GhostLast = 3;
+			}
+			else if (checkNumAvailable(4) && !check.checkNextCollisionDown(rec))
+			{
+				// move down
 
-					redGhostLast = 4;
-				}
+				GhostLast = 4;
+			}
 		}
 
-		else if (red_ghost_direction.x == 0)
+		else if (direction.x == 0)
+		{
+			if (checkNumAvailable(1) && checkNumAvailable(2))
 			{
-				if (checkNumAvailable(1) && checkNumAvailable(2))
-				{
-					// rand num
+				// rand num
 
-					ranNum = (rand() % 2) + 1;
+				ranNum = (rand() % 2) + 1;
 
-					redGhostLast = ranNum;
-				}
-				else if (checkNumAvailable(1) && !check.checkNextCollisionRight(red_rec))
-				{
-					// move right
-					redGhostLast = 1;
-				}
-				else if (checkNumAvailable(2) && !check.checkNextCollisionLeft(red_rec))
-				{
-					// move left
-					redGhostLast = 2;
-				}
+				GhostLast = ranNum;
 			}
-			
-		
+			else if (checkNumAvailable(1) && !check.checkNextCollisionRight(rec))
+			{
+				// move right
+				GhostLast = 1;
+			}
+			else if (checkNumAvailable(2) && !check.checkNextCollisionLeft(rec))
+			{
+				// move left
+				GhostLast = 2;
+			}
+		}
+
+
 
 		// movement
-		
-		switch (redGhostLast)
+
+		switch (GhostLast)
 		{
-		case 1 : 
-			red_position.x += 5;
-			red_ghost_direction.x = 1;
-			red_ghost_direction.y = 0;
+		case 1:
+			Position.x += 5;
+			direction.x = 1;
+			direction.y = 0;
 
 			break;
-		case 2 :
-			red_position.x -= 5;
-			red_ghost_direction.x = -1;
-			red_ghost_direction.y = 0;
+		case 2:
+			Position.x -= 5;
+			direction.x = -1;
+			direction.y = 0;
 
 			break;
 		case 3:
-			red_position.y -= 5;
-			red_ghost_direction.y = -1;
-			red_ghost_direction.x = 0;
+			std::cout << "im called\n";
+			Position.y -= 5;
+			direction.y = -1;
+			direction.x = 0;
 			break;
 		case 4:
-			red_position.y += 5;
-			red_ghost_direction.y = 1;
-			red_ghost_direction.x = 0;
+			Position.y += 5;
+			direction.y = 1;
+			direction.x = 0;
 			break;
 		}
 
-		
-		
-		}
+
+
+
+	}
+	
 	bool checkNumAvailable(int num)
 	{
 		for (int i = 0; i < 4; i++)
@@ -758,6 +757,9 @@ public:
 		}
 		return false;
 	}
+
+
+	
 
 	int collisionChange(int input)
 	{
@@ -775,20 +777,20 @@ public:
 			return hitbox;
 	}
 
-	void ghostCollision()
+	void ghostCollision(Rectangle& rec)
 	{
-		for (int i = 0; i < 566; ++i)
+		for (int i = 0; i < blockAmount; ++i)
 		{
 			if (CheckCollisionRecs(getGhostHitbox(), Blocks[i]))
 			{
-				if (red_ghost_direction.x > 0)
-					red_position.x = Blocks[i].x - red_rec.width;
-				else if (red_ghost_direction.x < 0)
-					red_position.x = Blocks[i].x + red_rec.width;
-				else if (red_ghost_direction.y > 0)
-					red_position.y = Blocks[i].y - red_rec.height;
-				else if (red_ghost_direction.y < 0)
-					red_position.y = Blocks[i].y + red_rec.height;
+				if (red_direction.x > 0)
+					red_position.x = Blocks[i].x - rec.width;
+				else if (red_direction.x < 0)
+					red_position.x = Blocks[i].x + rec.width;
+				else if (red_direction.y > 0)
+					red_position.y = Blocks[i].y - rec.height;
+				else if (red_direction.y < 0)
+					red_position.y = Blocks[i].y + rec.height;
 				redGhostCollided = true;
 				return;
 			}
@@ -798,7 +800,7 @@ public:
 
 	bool checkGhostCollision()
 	{
-		for (int i = 0; i < 566; ++i)
+		for (int i = 0; i < blockAmount; ++i)
 		{
 			if (CheckCollisionRecs(red_rec, Blocks[i]))
 			{
@@ -819,6 +821,11 @@ public:
 		DrawTextureRec(red_ghost_texture, red_rec, red_position, WHITE);
 	}
 
+	void drawBlueGhost()
+	{
+		DrawTextureRec(blue_ghost_texture, blue_rec, blue_position, WHITE);
+	}
+
 	void checkGhostCollision(Rectangle rec)
 	{
 		
@@ -835,14 +842,22 @@ public:
 private:
 
 	Texture2D red_ghost_texture = LoadTexture("C:/Users/Omar/Desktop/Pac/pac-man/red_ghost.png");
-
 	Rectangle red_rec = { (float)red_position.x, (float)red_position.y , (float)red_ghost_texture.width, (float)red_ghost_texture.height};
+	Vector2 red_position = { 260, 240};
+	Vector2 red_direction = { 1, 1 };
+	int redGhostLast = 0;
 
-	Vector2 red_position = { 300, 250 };
-	Vector2 red_ghost_direction = { 1, 1 };
+	Texture2D blue_ghost_texture = LoadTexture("C:/Users/Omar/Desktop/Pac/pac-man/blue_ghost.png");
+	Rectangle blue_rec = { (float)blue_position.x, (float)blue_position.y, 20, 20 };
+	Vector2 blue_position = {280, 240};
+	Vector2 blue_direction = { 1, 1 };
+	int blueGhostLast = 0;
+
+
+
+
 
 	int ghostCount = 0;
-	int redGhostLast = 0;
 	int available[4] = { 0,0,0,0 };
 	int ranNum;
 	bool redGhostCollided = false;
@@ -871,7 +886,7 @@ public:
 
 
 					Rectangle block = { (float)x_position, (float)y_position, (float)blockSize, (float)blockSize };
-					if (blockCount < 556) {
+					if (blockCount < blockAmount) {
 						Blocks[blockCount] = block;
 						blockCount++;
 					}
@@ -917,11 +932,10 @@ int main()
 
 	Map pacMap;
 	PacMan pac;
-	Ghost red_ghost;
+	Ghost ghosts;
 	Fruits pacFruit;
 
 	pac.pacGrid(Grid, 31, 28);
-	red_ghost.createRedGhost();
 
 	while (!WindowShouldClose())
 	{
@@ -929,8 +943,6 @@ int main()
 
 		BeginDrawing();
 		pac.Draw();
-		red_ghost.drawRedGhost();
-
 
 		if (!moving)
 		{
@@ -940,12 +952,12 @@ int main()
 		
 		if (gameRunning)
 		{
-			red_ghost.checkGhostCollision(pac.getHitbox());
+			ghosts.checkGhostCollision(pac.getHitbox());
 			pac.checkLogic();
-			red_ghost.moveRedGhost();
-			red_ghost.ghostCollision();
+			ghosts.redGhost();
+			//ghosts.blueGhost();
 			pac.eatFruit();
-			red_ghost.updateRand();
+			ghosts.updateRand();
 		}
 
 		ClearBackground(BLACK);
