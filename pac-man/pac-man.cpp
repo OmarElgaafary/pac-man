@@ -13,6 +13,8 @@ Vector2 scorePositonNum = { 150 ,700 };
 bool moving = false;
 int game_score = 0;
 bool gameRunning = false;
+bool soundPaused = false;
+
 
 
 
@@ -31,7 +33,7 @@ int Grid[31][28] = {
 	{1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1},
 	{1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1},
 	{1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1},
-	{1,1,1,1,1,1,0,1,1,0,1,1,3,3,3,3,1,1,0,1,1,0,1,1,1,1,1,1},
+	{1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1},
 	{1,1,1,1,1,1,0,1,1,0,1,3,3,3,3,3,3,1,0,1,1,0,1,1,1,1,1,1},
 	{1,0,0,0,0,0,0,0,0,0,1,3,3,3,3,3,3,1,0,0,0,0,0,0,0,0,0,1},
 	{1,1,1,1,1,1,0,1,1,0,1,3,3,3,3,3,3,1,0,1,1,0,1,1,1,1,1,1},
@@ -197,6 +199,9 @@ public:
 
 	void startMoving()
 	{
+		//start of game sound
+
+
 		if (IsKeyDown(KEY_RIGHT))
 		{
 			last = 1;
@@ -220,6 +225,11 @@ public:
 	}
 
 	void checkLogic() {
+
+
+
+		if (game_score == 2910)
+			gameRunning = false;
 
 		pac_direction.x = (float)IsKeyDown(KEY_RIGHT) - (float)IsKeyDown(KEY_LEFT);
 		pac_direction.y = (float)IsKeyDown(KEY_DOWN) - (float)IsKeyDown(KEY_UP);
@@ -316,7 +326,6 @@ public:
 
 				if (queueDown)
 				{
-					std::cout << "Im called\n";
 					if (!check.checkNextCollisionDown(getHitbox()))
 					{
 						last = 4;
@@ -513,11 +522,31 @@ public:
 		{
 			if (CheckCollisionRecs(getHitbox(), Fruit_Blocks[i].fruit) && !Fruit_Blocks[i].eaten)
 			{
+				playerEating = true;
 				Fruit_Blocks[i].eaten = true;
 				game_score += 10;
+				soundPlayed = true;
+				return;
+			}
+			else {
+				playerEating = false;
+				soundPlayed = false;
 			}
 		}
+
+		
 	}
+
+	bool soundPlayed = false;
+	void playFruitSound()
+	{
+		if (playerEating && !soundPlayed)
+		{
+			PlaySound(eat);
+			soundPlayed = true;
+		}
+	}
+
 
 	void pos()
 	{
@@ -542,6 +571,8 @@ private:
 	Texture2D pac_right = LoadTexture("C:/Users/Omar/Desktop/Pac/pac-man/pac-man-h.png");
 	Texture2D pac_up = LoadTexture("C:/Users/Omar/Desktop/Pac/pac-man/pac-man-v.png");
 
+	Sound eat = LoadSound("C:/Users/Omar/Desktop/Pac/pac-man/Sounds/Pac-Man-Waka Waka.wav");
+
 	Rectangle framerec = { 0.0f, 0.0f, (float)pac_right.width / 9 , (float)pac_right.height };
 
 	Vector2 position = { 20, 20 };
@@ -557,13 +588,8 @@ private:
 	bool queueDown = false;
 	bool queueRight = false;
 	bool queueLeft = false;
+	bool playerEating = false;
 
-};
-
-struct availablePosition 
-{
-	int position;
-	bool availability;
 };
 
 class Ghost
@@ -602,6 +628,8 @@ public:
 
 	void createGhost(Rectangle& rec, Vector2& Position, Vector2& direction, int& GhostLast)
 	{
+		for (int i = 0; i < 4; ++i) available[i] = 0;
+
 		red_rec.x = red_position.x;
 		red_rec.y = red_position.y;
 
@@ -663,52 +691,101 @@ public:
 
 		// check available positons for movement
 
+		std::cout << "D(X): " << direction.x << std::endl;
+		std::cout << "D(Y): " << direction.y << std::endl;
 
-		if (direction.y == 0)
+		
+		if (!check.checkNextCollisionDown(rec) && check.checkNextCollisionRight(rec))
 		{
-			if (checkNumAvailable(3) && checkNumAvailable(4))
-			{
-				// rand num
+			ranNum = (rand() % 2);
 
-				ranNum = ((rand() % 2) + 1) + 2;
-
-				GhostLast = ranNum;
-
-
-			}
-			else if (checkNumAvailable(3) && !check.checkNextCollisionUp(rec))
-			{
-				// move up
-
-				GhostLast = 3;
-			}
-			else if (checkNumAvailable(4) && !check.checkNextCollisionDown(rec))
-			{
-				// move down
-
+			if (ranNum == 0)
 				GhostLast = 4;
+			else if (ranNum == 1)
+				GhostLast = 1;
+		}
+
+		else if (!check.checkNextCollisionDown(rec) && !check.checkNextCollisionLeft(rec))
+		{
+			ranNum = (rand() % 2);
+
+			if (ranNum == 0)
+				GhostLast = 4;
+			else if (ranNum == 1)
+				GhostLast = 2;
+		}
+
+		else if (!check.checkNextCollisionUp(rec) && !check.checkNextCollisionRight(rec))
+		{
+			ranNum = (rand() % 2);
+
+			if (ranNum == 0)
+				GhostLast = 3;
+			else if (ranNum == 1)
+				GhostLast = 1;
+		}
+
+		else if (!check.checkNextCollisionUp(rec) && !check.checkNextCollisionLeft(rec))
+		{
+			ranNum = (rand() % 2);
+
+			if (ranNum == 0)
+				GhostLast = 3;
+			else if (ranNum == 1)
+				GhostLast = 2;
+		}
+
+		if (check.checkNextCollisionRight(rec) || check.checkNextCollisionLeft(rec))
+		{
+			if (direction.y == 0)
+			{
+				if (!check.checkNextCollisionUp(rec) && !check.checkNextCollisionDown(rec))
+				{
+					// rand num
+
+					ranNum = ((rand() % 2) + 1) + 2;
+
+					GhostLast = ranNum;
+
+
+				}
+				else if (!check.checkNextCollisionUp(rec))
+				{
+					// move up
+
+					GhostLast = 3;
+				}
+				else if (!check.checkNextCollisionDown(rec))
+				{
+					// move down
+
+					GhostLast = 4;
+				}
 			}
 		}
 
-		else if (direction.x == 0)
+		else if (check.checkNextCollisionDown(rec) || check.checkNextCollisionUp(rec))
 		{
-			if (checkNumAvailable(1) && checkNumAvailable(2))
+			if (direction.x == 0)
 			{
-				// rand num
+				if (!check.checkNextCollisionRight(rec) && !check.checkNextCollisionLeft(rec))
+				{
+					// rand num
 
-				ranNum = (rand() % 2) + 1;
+					ranNum = (rand() % 2) + 1;
 
-				GhostLast = ranNum;
-			}
-			else if (checkNumAvailable(1) && !check.checkNextCollisionRight(rec))
-			{
-				// move right
-				GhostLast = 1;
-			}
-			else if (checkNumAvailable(2) && !check.checkNextCollisionLeft(rec))
-			{
-				// move left
-				GhostLast = 2;
+					GhostLast = ranNum;
+				}
+				else if (!check.checkNextCollisionRight(rec))
+				{
+					// move right
+					GhostLast = 1;
+				}
+				else if (!check.checkNextCollisionLeft(rec))
+				{
+					// move left
+					GhostLast = 2;
+				}
 			}
 		}
 
@@ -719,25 +796,24 @@ public:
 		switch (GhostLast)
 		{
 		case 1:
-			Position.x += 5;
+			Position.x += 2.5;
 			direction.x = 1;
 			direction.y = 0;
 
 			break;
 		case 2:
-			Position.x -= 5;
+			Position.x -= 2.5;
 			direction.x = -1;
 			direction.y = 0;
 
 			break;
 		case 3:
-			std::cout << "im called\n";
-			Position.y -= 5;
+			Position.y -= 2.5;
 			direction.y = -1;
 			direction.x = 0;
 			break;
 		case 4:
-			Position.y += 5;
+			Position.y += 2.5;
 			direction.y = 1;
 			direction.x = 0;
 			break;
@@ -791,27 +867,9 @@ public:
 					red_position.y = Blocks[i].y - rec.height;
 				else if (red_direction.y < 0)
 					red_position.y = Blocks[i].y + rec.height;
-				redGhostCollided = true;
 				return;
 			}
 		}
-	}
-
-
-	bool checkGhostCollision()
-	{
-		for (int i = 0; i < blockAmount; ++i)
-		{
-			if (CheckCollisionRecs(red_rec, Blocks[i]))
-			{
-				return true;
-				redGhostCollided = true;
-
-			}
-		}
-		redGhostCollided = false;
-
-		return false;
 	}
 
 	
@@ -826,10 +884,10 @@ public:
 		DrawTextureRec(blue_ghost_texture, blue_rec, blue_position, WHITE);
 	}
 
-	void checkGhostCollision(Rectangle rec)
+	void checkEvents(Rectangle rec)
 	{
 		
-			if (CheckCollisionRecs(rec, red_rec))
+		if (CheckCollisionRecs(rec, red_rec))
 			{
 				std::cout << "Game Over\n";
 				gameRunning = false;
@@ -843,13 +901,13 @@ private:
 
 	Texture2D red_ghost_texture = LoadTexture("C:/Users/Omar/Desktop/Pac/pac-man/red_ghost.png");
 	Rectangle red_rec = { (float)red_position.x, (float)red_position.y , (float)red_ghost_texture.width, (float)red_ghost_texture.height};
-	Vector2 red_position = { 260, 240};
+	Vector2 red_position = { 260, 220};
 	Vector2 red_direction = { 1, 1 };
 	int redGhostLast = 0;
 
 	Texture2D blue_ghost_texture = LoadTexture("C:/Users/Omar/Desktop/Pac/pac-man/blue_ghost.png");
-	Rectangle blue_rec = { (float)blue_position.x, (float)blue_position.y, 20, 20 };
-	Vector2 blue_position = {280, 240};
+	Rectangle blue_rec = { (float)blue_position.x, (float)blue_position.y, (float)blue_ghost_texture.width,(float)blue_ghost_texture.width };
+	Vector2 blue_position = {280, 260};
 	Vector2 blue_direction = { 1, 1 };
 	int blueGhostLast = 0;
 
@@ -860,7 +918,6 @@ private:
 	int ghostCount = 0;
 	int available[4] = { 0,0,0,0 };
 	int ranNum;
-	bool redGhostCollided = false;
 
 };
 
@@ -909,6 +966,7 @@ public:
 			std::cout << "\n";
 		}
 	}
+	
 
 
 private:
@@ -921,6 +979,7 @@ private:
 
 };
 
+Vector2 losePosition = {222, 280};
 
 int main()
 
@@ -928,7 +987,8 @@ int main()
 	SetTargetFPS(60);
 	SetTraceLogLevel(LOG_NONE);
 
-	InitWindow(Xres, Yres, "Pac-Man indevelopment by Omar Adly");
+	InitWindow(Xres, Yres, "Pac-Man");
+	InitAudioDevice();
 
 	Map pacMap;
 	PacMan pac;
@@ -936,13 +996,13 @@ int main()
 	Fruits pacFruit;
 
 	pac.pacGrid(Grid, 31, 28);
+	
 
 	while (!WindowShouldClose())
 	{
 		DrawTextEx(font, "Score:", scorePositionText, 25, 2, WHITE);
 
 		BeginDrawing();
-		pac.Draw();
 
 		if (!moving)
 		{
@@ -952,13 +1012,27 @@ int main()
 		
 		if (gameRunning)
 		{
-			ghosts.checkGhostCollision(pac.getHitbox());
+			pac.playFruitSound();
+			pac.Draw();
+			ghosts.checkEvents(pac.getHitbox());
 			pac.checkLogic();
 			ghosts.redGhost();
 			//ghosts.blueGhost();
 			pac.eatFruit();
 			ghosts.updateRand();
 		}
+
+		if (!gameRunning && game_score != 2910)
+		{
+			DrawTextEx(font, "You Lose!", losePosition, 25, 2, RED);
+		}
+
+		else if (!gameRunning && game_score == 2910)
+		{
+			DrawTextEx(font, "You Won!", losePosition, 25, 2, GREEN);
+		}
+
+		
 
 		ClearBackground(BLACK);
 
@@ -971,7 +1045,8 @@ int main()
 		EndDrawing();
 	}
 
+	CloseAudioDevice();
 	CloseWindow();
-
+	
 	return 0;
 }
